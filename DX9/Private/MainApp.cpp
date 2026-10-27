@@ -4,11 +4,12 @@
 
 #include "Cube.h"
 #include "Teapot.h"
+#include "Triangle.h"
 
 CMainApp::CMainApp()
 	: m_VB(nullptr), m_IB(nullptr),
 	m_pCube(nullptr), m_pTeapot(nullptr), m_pTriangle(nullptr),
-	m_eRenderObj(TEAPOT)
+	m_eRenderObj(TRIANGLE)
 {
 }
 
@@ -27,7 +28,7 @@ bool CMainApp::Setup() // Initialize의 역할
 	{
 	case CUBE:
 	{
-		m_pCube = new CCube();
+		m_pCube = new CCube;
 
 		// 큐브 데이터로 버퍼를 채운다.
 		Vertex* vertices;
@@ -56,9 +57,35 @@ bool CMainApp::Setup() // Initialize의 역할
 
 		break;
 	}
+	case TRIANGLE:
+	{
+		m_pTriangle = new CTriangle;
+		Vertex* vertices;
+		int iIdx(0);
+
+		m_VB->Lock(0, 0, (void**)&vertices, 0);
+
+		for (Vertex vtx : m_pTriangle->GetVtxList())
+			vertices[iIdx++] = vtx;
+
+		m_VB->Unlock();
+
+		WORD* indices;
+		m_IB->Lock(0, 0, (void**)&indices, 0);
+		iIdx = 0;
+
+		for (WORD idx : m_pTriangle->GetIdxList())
+			indices[iIdx++] = idx;
+
+		m_IB->Unlock();
+
+		// 뒷면도 그려지게
+		Device->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
+		break;
+	}
 	case TEAPOT:
 	{
-		m_pTeapot = new CTeapot();
+		m_pTeapot = new CTeapot;
 		break;
 	}
 	}
@@ -102,6 +129,7 @@ void CMainApp::Update(float timeDelta)
 	// 큐브 회전
 	D3DXMATRIX Rx, Ry;
 	// X축으로 45도 회전
+	D3DXMatrixIdentity(&Rx);
 	D3DXMatrixRotationX(&Rx, D3DX_PI * 0.25f);
 
 	static float y(0.f);
@@ -130,11 +158,16 @@ bool CMainApp::Display() // Render의 역할
 		switch (m_eRenderObj)
 		{
 		case CUBE:
-		case TRIANGLE:
 			Device->SetStreamSource(0, m_VB, 0, sizeof(Vertex));
 			Device->SetIndices(m_IB);
 			Device->SetFVF(Vertex::FVF);
 			Device->DrawIndexedPrimitive(D3DPT_TRIANGLELIST, 0, 0, 8, 0, 12);
+			break;
+		case TRIANGLE:
+			Device->SetStreamSource(0, m_VB, 0, sizeof(Vertex));
+			Device->SetIndices(m_IB);
+			Device->SetFVF(Vertex::FVF);
+			Device->DrawIndexedPrimitive(D3DPT_TRIANGLELIST, 0, 0, 3, 0, 1);
 			break;
 		case TEAPOT:
 			m_pTeapot->GetMesh()->DrawSubset(0);

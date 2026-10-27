@@ -16,6 +16,9 @@
     <Filter Include="02. Teapot">
       <UniqueIdentifier>{51ea5440-34a9-4a49-9085-0b2e70dd9e51}</UniqueIdentifier>
     </Filter>
+    <Filter Include="03. Triangle">
+      <UniqueIdentifier>{8fa8662b-41fc-4b45-bcdd-ea06122a562a}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="d3dUtility.h">
@@ -48,6 +51,9 @@
     <ClInclude Include="public\Teapot.h">
       <Filter>02. Teapot</Filter>
     </ClInclude>
+    <ClInclude Include="public\Triangle.h">
+      <Filter>03. Triangle</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="d3dUtility.cpp">
@@ -67,6 +73,9 @@
     </ClCompile>
     <ClCompile Include="private\Teapot.cpp">
       <Filter>02. Teapot</Filter>
+    </ClCompile>
+    <ClCompile Include="private\Triangle.cpp">
+      <Filter>03. Triangle</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
