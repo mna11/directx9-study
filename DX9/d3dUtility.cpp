@@ -22,7 +22,7 @@ bool d3d::InitD3D(HINSTANCE hInstance, int width, int height, bool windowed,
 	RegisterClass(&WndClass);
 
 	HWND hWnd=NULL;
-	hWnd=::CreateWindow(TEXT("Direct3DApp"), TEXT("d3dCubeApp"), WS_EX_TOPMOST, 
+	hWnd=::CreateWindow(TEXT("Direct3DApp"), TEXT("colorShadeApp"), WS_EX_TOPMOST, 
 		0, 0, width, height, NULL, (HMENU)NULL, hInstance, NULL);
 	::ShowWindow(hWnd, SW_SHOW);
 	::UpdateWindow(hWnd);

@@ -7,7 +7,7 @@ IDirect3DDevice9* Device = 0;
 
 int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE prevInstance, LPWSTR cmdLine, int showCmd)
 {
-	if (!d3d::InitD3D(hInstance, 800, 600, true, D3DDEVTYPE_HAL, &Device))
+	if (!d3d::InitD3D(hInstance, g_iWinSizeX, g_iWinSizeY, true, D3DDEVTYPE_HAL, &Device))
 	{
 		::MessageBox(0, L"InitD3D() - FAILED", 0, 0);
 		return 0;
