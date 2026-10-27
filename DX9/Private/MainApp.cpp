@@ -1,7 +1,16 @@
 ﻿#include "pch.h"
 #include "MainApp.h"
 #include "Defines.h"
+
 #include "Cube.h"
+#include "Teapot.h"
+
+CMainApp::CMainApp()
+	: m_VB(nullptr), m_IB(nullptr),
+	m_pCube(nullptr), m_pTeapot(nullptr), m_pTriangle(nullptr),
+	m_eRenderObj(TEAPOT)
+{
+}
 
 CMainApp::~CMainApp()
 {
@@ -14,34 +23,46 @@ bool CMainApp::Setup() // Initialize의 역할
 	// 인덱스 버퍼 만들기
 	Device->CreateIndexBuffer(36 * sizeof(WORD), D3DUSAGE_WRITEONLY, D3DFMT_INDEX16, D3DPOOL_MANAGED, &m_IB, 0);
 
-	// 큐브 생성
-	CCube Cube;
+	switch (m_eRenderObj)
+	{
+	case CUBE:
+	{
+		m_pCube = new CCube();
 
-	// 큐브 데이터로 버퍼를 채운다.
-	Vertex* vertices;
+		// 큐브 데이터로 버퍼를 채운다.
+		Vertex* vertices;
 
-	// Lock은 CPU가 버퍼 메모리에 접근할 수 있도록 준비하고, 그 메모리의 주소를 vertices에 넣어준다.
-	// 0, 0은 버퍼 전체에 접근하겠다.
-	m_VB->Lock(0, 0, (void**)&vertices, 0);
+		// Lock은 CPU가 버퍼 메모리에 접근할 수 있도록 준비하고, 그 메모리의 주소를 vertices에 넣어준다.
+		// 0, 0은 버퍼 전체에 접근하겠다.
+		m_VB->Lock(0, 0, (void**)&vertices, 0);
 
-	const list<Vertex>& vtxList = Cube.GetVtxList();
-	int iIdx(0);
-	for (Vertex vtx : vtxList)
-		vertices[iIdx++] = vtx;
+		const list<Vertex>& vtxList = m_pCube->GetVtxList();
+		int iIdx(0);
+		for (Vertex vtx : vtxList)
+			vertices[iIdx++] = vtx;
 
-	m_VB->Unlock();
+		m_VB->Unlock();
 
-	// 큐브의 삼각형을 정의한다.
-	WORD* indices = 0;
-	m_IB->Lock(0, 0, (void**)&indices, 0);
+		// 큐브의 삼각형을 정의한다.
+		WORD* indices = 0;
+		m_IB->Lock(0, 0, (void**)&indices, 0);
 
-	const list<WORD>& idxList = Cube.GetIdxList();
-	iIdx = 0;
-	for (WORD idx : idxList)
-		indices[iIdx++] = idx;
+		const list<WORD>& idxList = m_pCube->GetIdxList();
+		iIdx = 0;
+		for (WORD idx : idxList)
+			indices[iIdx++] = idx;
 
-	m_IB->Unlock();
+		m_IB->Unlock();
 
+		break;
+	}
+	case TEAPOT:
+	{
+		m_pTeapot = new CTeapot();
+		break;
+	}
+	}
+	
 	// 카메라의 위치와 방향을 조정한다.
 	D3DXVECTOR3 position(0.f, 0.f, -5.f);
 	D3DXVECTOR3 target(0.f, 0.f, 0.f);
@@ -68,6 +89,9 @@ void CMainApp::Cleanup() // Release의 역할
 {
 	d3d::Release<IDirect3DVertexBuffer9*>(m_VB);
 	d3d::Release<IDirect3DIndexBuffer9*>(m_IB);
+
+	d3d::Delete<CCube*>(m_pCube);
+	d3d::Delete<CTeapot*>(m_pTeapot);
 }
 
 void CMainApp::Update(float timeDelta)
@@ -94,6 +118,7 @@ bool CMainApp::Display() // Render의 역할
 {
 	if (Device)
 	{
+
 		// 초기화
 		// 전체 화면을 지우겠다 (0, 0)
 		// Target Surface와 깊이 버퍼를 지우겠다.
@@ -102,10 +127,19 @@ bool CMainApp::Display() // Render의 역할
 
 		Device->BeginScene();
 
-		Device->SetStreamSource(0, m_VB, 0, sizeof(Vertex));
-		Device->SetIndices(m_IB);
-		Device->SetFVF(Vertex::FVF);
-		Device->DrawIndexedPrimitive(D3DPT_TRIANGLELIST, 0, 0, 8, 0, 12);
+		switch (m_eRenderObj)
+		{
+		case CUBE:
+		case TRIANGLE:
+			Device->SetStreamSource(0, m_VB, 0, sizeof(Vertex));
+			Device->SetIndices(m_IB);
+			Device->SetFVF(Vertex::FVF);
+			Device->DrawIndexedPrimitive(D3DPT_TRIANGLELIST, 0, 0, 8, 0, 12);
+			break;
+		case TEAPOT:
+			m_pTeapot->GetMesh()->DrawSubset(0);
+			break;
+		}
 		
 		Device->EndScene();
 

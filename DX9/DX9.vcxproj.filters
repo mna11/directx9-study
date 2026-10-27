@@ -13,6 +13,9 @@
     <Filter Include="01. Cube">
       <UniqueIdentifier>{1f653ecf-bff0-4adc-88e9-f7207c6c001e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="02. Teapot">
+      <UniqueIdentifier>{51ea5440-34a9-4a49-9085-0b2e70dd9e51}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="d3dUtility.h">
@@ -42,6 +45,9 @@
     <ClInclude Include="public\Cube.h">
       <Filter>01. Cube</Filter>
     </ClInclude>
+    <ClInclude Include="public\Teapot.h">
+      <Filter>02. Teapot</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="d3dUtility.cpp">
@@ -58,6 +64,9 @@
     </ClCompile>
     <ClCompile Include="private\Cube.cpp">
       <Filter>01. Cube</Filter>
+    </ClCompile>
+    <ClCompile Include="private\Teapot.cpp">
+      <Filter>02. Teapot</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

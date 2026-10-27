@@ -147,6 +147,7 @@
     <ClInclude Include="pch.h" />
     <ClInclude Include="public\Cube.h" />
     <ClInclude Include="public\MainApp.h" />
+    <ClInclude Include="public\Teapot.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="targetver.h" />
   </ItemGroup>
@@ -159,6 +160,7 @@
     </ClCompile>
     <ClCompile Include="private\Cube.cpp" />
     <ClCompile Include="private\MainApp.cpp" />
+    <ClCompile Include="private\Teapot.cpp" />
     <ClCompile Include="winMain.cpp" />
   </ItemGroup>
   <ItemGroup>
