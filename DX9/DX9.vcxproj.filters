@@ -10,6 +10,9 @@
     <Filter Include="99. Defines">
       <UniqueIdentifier>{831180a4-f275-4e48-84e4-d468b6d16fe5}</UniqueIdentifier>
     </Filter>
+    <Filter Include="01. Cube">
+      <UniqueIdentifier>{1f653ecf-bff0-4adc-88e9-f7207c6c001e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="d3dUtility.h">
@@ -33,22 +36,28 @@
     <ClInclude Include="pch.h">
       <Filter>99. Defines</Filter>
     </ClInclude>
+    <ClInclude Include="Defines.h">
+      <Filter>99. Defines</Filter>
+    </ClInclude>
+    <ClInclude Include="public\Cube.h">
+      <Filter>01. Cube</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="d3dUtility.cpp">
       <Filter>98. Default</Filter>
     </ClCompile>
-    <ClCompile Include="WinMain.cpp">
+    <ClCompile Include="winMain.cpp">
       <Filter>98. Default</Filter>
     </ClCompile>
     <ClCompile Include="private\MainApp.cpp">
       <Filter>00. MainApp</Filter>
     </ClCompile>
-    <ClCompile Include="Defines.h">
-      <Filter>99. Defines</Filter>
-    </ClCompile>
     <ClCompile Include="pch.cpp">
       <Filter>99. Defines</Filter>
+    </ClCompile>
+    <ClCompile Include="private\Cube.cpp">
+      <Filter>01. Cube</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

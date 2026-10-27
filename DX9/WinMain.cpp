@@ -1,13 +1,12 @@
 ﻿
 #include "pch.h"
-#include "d3dUtility.h"
 #include "MainApp.h"
 
 IDirect3DDevice9* Device = 0;
 
 int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE prevInstance, LPWSTR cmdLine, int showCmd)
 {
-	if (!d3d::InitD3D(hInstance, 800, 600, true, D3DDEVTYPE_HAL, &Device))
+	if (!d3d::InitD3D(hInstance, g_iWinSizeX, g_iWinSizeY, true, D3DDEVTYPE_HAL, &Device))
 	{
 		::MessageBox(0, L"InitD3D() - FAILED", 0, 0);
 		return 0;
@@ -21,9 +20,14 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE prevInstance, LPWSTR cmdLine,
 		return 0;
 	}
 
-	d3d::EnterMsgLoop([&MainApp](float timeDelta)-> bool{
-		return MainApp.Display(timeDelta);
-	});
+	d3d::EnterMsgLoop(
+		[&MainApp](float timeDeleta) {
+			return MainApp.Update(timeDeleta);
+		},
+		[&MainApp]()-> bool {
+			return MainApp.Display();
+		}
+	);
 
 	MainApp.Cleanup();
 

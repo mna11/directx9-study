@@ -8,6 +8,10 @@ public:
 public: 
 	bool Setup();
 	void Cleanup();
-	bool Display(float timeDeleta);
+	void Update(float timeDelta);
+	bool Display();
+private:
+	IDirect3DVertexBuffer9* m_VB = 0;
+	IDirect3DIndexBuffer9*	m_IB = 0;
 };
 

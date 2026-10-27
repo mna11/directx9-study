@@ -2,7 +2,11 @@
 
 #include <d3d9.h>
 #include <functional>
+#include <list>
+#include <algorithm>
 
 #include "Defines.h"
+#include "d3dUtility.h"
 
+using namespace std;
 
