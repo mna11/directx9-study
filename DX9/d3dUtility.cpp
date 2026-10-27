@@ -99,7 +99,7 @@ bool d3d::InitD3D(HINSTANCE hInstance, int width, int height, bool windowed,
 	/*================================================
 		메시지 루프
 	  ================================================*/
-int d3d::EnterMsgLoop(std::function<bool(float)> ptr_display)
+int d3d::EnterMsgLoop(std::function<void(float)> ptr_update, std::function<bool()> ptr_display)
 {
 	MSG Message;
 	ZeroMemory(&Message, sizeof(Message));
@@ -116,7 +116,8 @@ int d3d::EnterMsgLoop(std::function<bool(float)> ptr_display)
 		{
 			float currTime=(float)timeGetTime();
 			float timeDelta=(currTime-lastTime)*0.001f;
-			ptr_display(timeDelta);			//디스플레이 함수 호출
+			ptr_update(timeDelta);			
+			ptr_display();
 			lastTime=currTime;
 		}
 	}

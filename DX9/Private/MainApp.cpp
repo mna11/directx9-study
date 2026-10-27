@@ -15,7 +15,11 @@ void CMainApp::Cleanup() // Release의 역할
 {
 }
 
-bool CMainApp::Display(float timeDeleta) // Render의 역할
+void CMainApp::Update(float timeDelta)
+{
+}
+
+bool CMainApp::Display() // Render의 역할
 {
 	if (Device)
 	{

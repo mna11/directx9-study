@@ -8,6 +8,7 @@ public:
 public: 
 	bool Setup();
 	void Cleanup();
-	bool Display(float timeDeleta);
+	void Update(float timeDelta);
+	bool Display();
 };
 

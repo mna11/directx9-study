@@ -21,9 +21,14 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE prevInstance, LPWSTR cmdLine,
 		return 0;
 	}
 
-	d3d::EnterMsgLoop([&MainApp](float timeDelta)-> bool{
-		return MainApp.Display(timeDelta);
-	});
+	d3d::EnterMsgLoop(
+		[&MainApp](float timeDelta){
+			MainApp.Update(timeDelta);
+		},
+		[&MainApp]()->bool {
+			return MainApp.Display();
+		}
+	);
 
 	MainApp.Cleanup();
 

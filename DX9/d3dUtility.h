@@ -12,7 +12,7 @@
 
 	// 애플리케이션의 메시지 루프를 포장
 	// 함수는 디스플레이 함수가 될 함수의 포인터를 받음
-	int EnterMsgLoop(std::function<bool(float)> ptr_display);
+	int EnterMsgLoop(std::function<void(float)> ptr_update, std::function<bool()> ptr_display);
 
 	// 메인 애플리케이션 윈도우를 위한 윈도우 프로시저
 	LRESULT CALLBACK WndProc(
