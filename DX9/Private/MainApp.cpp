@@ -119,6 +119,7 @@ void CMainApp::Cleanup() // Release의 역할
 
 	d3d::Delete<CCube*>(m_pCube);
 	d3d::Delete<CTeapot*>(m_pTeapot);
+	d3d::Delete<CTriangle*>(m_pTriangle);
 }
 
 void CMainApp::Update(float timeDelta)
