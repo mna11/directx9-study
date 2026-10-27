@@ -1,4 +1,7 @@
-﻿namespace d3d
+﻿#pragma once
+
+
+namespace d3d
 {
 	// 메인 윈도우 초기화, D3D 초기화, 성공시 IDirect3DDevice9 포인터 리턴
 	bool InitD3D(

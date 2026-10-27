@@ -8,5 +8,6 @@
 #include <algorithm>
 
 #include "Defines.h"
+#include "d3dUtility.h"
 
-
+using namespace std;

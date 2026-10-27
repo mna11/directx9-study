@@ -1,5 +1,5 @@
-﻿#include "MainApp.h"
-#include "Defines.h"
+﻿#include "pch.h"
+#include "MainApp.h"
 
 CMainApp::~CMainApp()
 {
