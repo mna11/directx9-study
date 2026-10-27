@@ -13,6 +13,16 @@ namespace d3d
 		IDirect3DDevice9** device
 	);
 
+	// D3DMATERIAL9 초기화
+	D3DMATERIAL9 InitMtrl(
+		D3DXCOLOR a,	// 환경광   Ambient
+		D3DXCOLOR d,	// 난반사광 Diffuse
+		D3DXCOLOR s,	// 정반사광 Specular
+		D3DXCOLOR e,	// 방출광   Emssive
+		float	  p		// 정반사광의 세기 Power 
+	);
+	
+
 	// 애플리케이션의 메시지 루프를 포장
 	// 함수는 디스플레이 함수가 될 함수의 포인터를 받음
 	int EnterMsgLoop(std::function<void(float)> ptr_update, std::function<bool()> ptr_display);
@@ -42,6 +52,7 @@ namespace d3d
 		}
 	}
 
+	// 컬러
 	const D3DXCOLOR WHITE(D3DCOLOR_XRGB(255, 255, 255));
 	const D3DXCOLOR	BLACK(D3DCOLOR_XRGB(0, 0, 0));
 	const D3DXCOLOR	RED(D3DCOLOR_XRGB(255, 0, 0));
@@ -51,4 +62,11 @@ namespace d3d
 	const D3DXCOLOR	YELLOW(D3DCOLOR_XRGB(255, 255, 0));
 	const D3DXCOLOR	CYAN(D3DCOLOR_XRGB(0, 255, 255));
 	const D3DXCOLOR	MAGENTA(D3DCOLOR_XRGB(255, 0, 255));
+
+	// 조명 - embient가 BLACK이다 : 빛을 발산하지 않는다.
+	const D3DMATERIAL9 WHITE_MTRL	= InitMtrl(WHITE, WHITE, WHITE, BLACK, 8.f);
+	const D3DMATERIAL9 RED_MTRL = InitMtrl(RED, RED, RED, BLACK, 8.f);
+	const D3DMATERIAL9 GREEN_MTRL = InitMtrl(GREEN, GREEN, GREEN, BLACK, 8.f);
+	const D3DMATERIAL9 BLUE_MTRL = InitMtrl(BLUE, BLUE, BLUE, BLACK, 8.f);
+	const D3DMATERIAL9 YELLOW_MTRL = InitMtrl(YELLOW, YELLOW, YELLOW, BLACK, 8.f);
 }

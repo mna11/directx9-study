@@ -96,6 +96,19 @@ bool d3d::InitD3D(HINSTANCE hInstance, int width, int height, bool windowed,
 	return true;
 }
 
+D3DMATERIAL9 d3d::InitMtrl(D3DXCOLOR a, D3DXCOLOR d, D3DXCOLOR s, D3DXCOLOR e, float p)
+{
+	D3DMATERIAL9 mtrl;
+	mtrl.Ambient = a;
+	mtrl.Diffuse = d;
+	mtrl.Specular = s;
+	mtrl.Emissive = e;
+	mtrl.Power = p;
+
+	return mtrl;
+}
+
+
 	/*================================================
 		메시지 루프
 	  ================================================*/

@@ -9,13 +9,14 @@ namespace Client
 
 	struct Vertex
 	{
-		Vertex() : _x(0), _y(0), _z(0) {}
-		Vertex(float x, float y, float z) : _x(x), _y(y), _z(z) {}
+		Vertex() : _x(0), _y(0), _z(0), _nx(0), _ny(0), _nz(0) {}
+		Vertex(float x, float y, float z, float nx, float ny, float nz) : _x(x), _y(y), _z(z), _nx(nx), _ny(ny), _nz(nz) {}
 
 		float _x, _y, _z; 
+		float _nx, _ny, _nz;
 		static const DWORD FVF;
 	};
-	const DWORD Vertex::FVF = D3DFVF_XYZ;
+	const DWORD Vertex::FVF = D3DFVF_XYZ | D3DFVF_NORMAL;
 
 	struct ColorVertex
 	{
