@@ -22,6 +22,14 @@ namespace d3d
 		float	  p		// 정반사광의 세기 Power 
 	);
 	
+	//D3DLIGHT9 구조체를 이용해 광원을 지정한다.
+
+	// 방향성 광원 초기화
+	D3DLIGHT9 InitDirectionalLight(D3DXVECTOR3* direction, D3DXCOLOR* color);
+	// 점 광원 초기화
+	D3DLIGHT9 InitPointLight(D3DXVECTOR3* position, D3DXCOLOR* color);
+	// 스포트 광원 초기화
+	D3DLIGHT9 InitSpotLight(D3DXVECTOR3* position, D3DXVECTOR3* direction, D3DXCOLOR* color);
 
 	// 애플리케이션의 메시지 루프를 포장
 	// 함수는 디스플레이 함수가 될 함수의 포인터를 받음

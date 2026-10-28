@@ -108,6 +108,60 @@ D3DMATERIAL9 d3d::InitMtrl(D3DXCOLOR a, D3DXCOLOR d, D3DXCOLOR s, D3DXCOLOR e, f
 	return mtrl;
 }
 
+D3DLIGHT9 d3d::InitDirectionalLight(D3DXVECTOR3* direction, D3DXCOLOR* color)
+{
+	D3DLIGHT9 light;
+	::ZeroMemory(&light, sizeof(light));
+
+	light.Type = D3DLIGHT_DIRECTIONAL;
+	light.Ambient = *color * 0.4f;
+	light.Diffuse = *color;
+	light.Specular = *color * 0.6f;
+	light.Direction = *direction;
+
+	return light;
+}
+
+D3DLIGHT9 d3d::InitPointLight(D3DXVECTOR3* position, D3DXCOLOR* color)
+{
+	D3DLIGHT9 light;
+	::ZeroMemory(&light, sizeof(light));
+
+	light.Type = D3DLIGHT_POINT;
+	light.Ambient = *color * 0.6f;
+	light.Diffuse = *color;
+	light.Specular = *color * 0.6f;
+	light.Position = *position;
+	light.Range = 1000.0f;			// 빛이 영향을 줄 수 있는 최대 거리
+	light.Attenuation0 = 1.0f;		// 상수 감소 - 이 경우에는 감쇠하지 않겠다.
+	light.Attenuation1 = 0.0f;
+	light.Attenuation2 = 0.0f;
+
+	return light;
+}
+
+D3DLIGHT9 d3d::InitSpotLight(D3DXVECTOR3* position, D3DXVECTOR3* direction, D3DXCOLOR* color)
+{
+	D3DLIGHT9 light;
+	::ZeroMemory(&light, sizeof(light));
+
+	light.Type = D3DLIGHT_SPOT;
+	light.Ambient = *color * 0.0f;
+	light.Diffuse = *color;
+	light.Specular = *color * 0.6f;
+	light.Position = *position;
+	light.Direction = *direction;
+	light.Range = 1000.0f;
+	light.Falloff = 1.0f;			// 안쪽 원뿔과 바깥쪽 원뿔의 빛의 세기차이
+	light.Attenuation0 = 1.0f;
+	light.Attenuation1 = 0.0f;
+	light.Attenuation2 = 0.0f;
+	light.Theta = 0.4f;				// 안쪽 원뿔의 각도   - 라디안 
+	light.Phi = 0.9f;				// 바깥쪽 원뿔의 각도 - 라디안
+
+	return light;
+}
+
 
 	/*================================================
 		메시지 루프
