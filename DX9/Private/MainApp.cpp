@@ -48,6 +48,35 @@ void CMainApp::Cleanup() // Release의 역할
 
 void CMainApp::Update(float timeDelta)
 {
+	// wrap 어드레스 모드
+	if (::GetAsyncKeyState('W') & 0x8000f)
+	{
+		Device->SetSamplerState(0, D3DSAMP_ADDRESSU, D3DTADDRESS_WRAP);
+		Device->SetSamplerState(0, D3DSAMP_ADDRESSV, D3DTADDRESS_WRAP);
+	}
+
+	// border color 어드레스 모드
+	if (::GetAsyncKeyState('B') & 0x8000f)
+	{
+		Device->SetSamplerState(0, D3DSAMP_ADDRESSU, D3DTADDRESS_BORDER);
+		Device->SetSamplerState(0, D3DSAMP_ADDRESSV, D3DTADDRESS_BORDER);
+		Device->SetSamplerState(0, D3DSAMP_BORDERCOLOR, 0x000000ff);
+	}
+
+	// clamp 어드레스 모드
+	if (::GetAsyncKeyState('C') & 0x8000f)
+	{
+		Device->SetSamplerState(0, D3DSAMP_ADDRESSU, D3DTADDRESS_CLAMP);
+		Device->SetSamplerState(0, D3DSAMP_ADDRESSV, D3DTADDRESS_CLAMP);
+	}
+
+	// mirror 어드레스 모드
+	if (::GetAsyncKeyState('M') & 0x8000f)
+	{
+		Device->SetSamplerState(0, D3DSAMP_ADDRESSU, D3DTADDRESS_MIRROR);
+		Device->SetSamplerState(0, D3DSAMP_ADDRESSV, D3DTADDRESS_MIRROR);
+	}
+
 }
 
 bool CMainApp::Display() // Render의 역할
