@@ -10,6 +10,12 @@
     <Filter Include="99. Defines">
       <UniqueIdentifier>{831180a4-f275-4e48-84e4-d468b6d16fe5}</UniqueIdentifier>
     </Filter>
+    <Filter Include="01. Quad">
+      <UniqueIdentifier>{87fb1e8b-b52c-4056-800a-8ef6ad6d3896}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="02. Teapot">
+      <UniqueIdentifier>{b34acec1-aa33-4cc3-a95a-573920f97fc0}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="d3dUtility.h">
@@ -33,6 +39,13 @@
     <ClInclude Include="pch.h">
       <Filter>99. Defines</Filter>
     </ClInclude>
+    <ClInclude Include="Defines.h" />
+    <ClInclude Include="public\Quad.h">
+      <Filter>01. Quad</Filter>
+    </ClInclude>
+    <ClInclude Include="public\Teapot.h">
+      <Filter>02. Teapot</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="d3dUtility.cpp">
@@ -44,11 +57,14 @@
     <ClCompile Include="private\MainApp.cpp">
       <Filter>00. MainApp</Filter>
     </ClCompile>
-    <ClCompile Include="Defines.h">
-      <Filter>99. Defines</Filter>
-    </ClCompile>
     <ClCompile Include="pch.cpp">
       <Filter>99. Defines</Filter>
+    </ClCompile>
+    <ClCompile Include="private\Quad.cpp">
+      <Filter>01. Quad</Filter>
+    </ClCompile>
+    <ClCompile Include="private\Teapot.cpp">
+      <Filter>02. Teapot</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
