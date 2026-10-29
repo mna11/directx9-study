@@ -1,6 +1,5 @@
 ﻿#include "pch.h"
 #include "MainApp.h"
-#include "Pyramid.h"
 
 CMainApp::~CMainApp()
 {
@@ -9,65 +8,42 @@ CMainApp::~CMainApp()
 
 bool CMainApp::Setup() // Initialize의 역할
 {
-	// 조명 연산을 하겠다고 선언하는 것, 그러나 DX9는 디폴트로 활성되어 있으나 그냥 명시한 것
-	Device->SetRenderState(D3DRS_LIGHTING, true);
-	// 버텍스 버퍼 초기화
-	Device->CreateVertexBuffer(
-		12 * sizeof(Vertex),
-		D3DUSAGE_WRITEONLY,
-		Vertex::FVF,
-		D3DPOOL_MANAGED,
-		&m_VB,
-		0
-	);
+	m_MeshObjList.resize(4, nullptr);
+	m_matWorldList.resize(4);
 
+	// 오브젝트 생성
+	D3DXCreateTeapot(Device, &m_MeshObjList[0], 0);
+	D3DXCreateSphere(Device, 1.f, 20, 20, &m_MeshObjList[1], 0);
+	D3DXCreateTorus(Device, 0.5f, 1.f, 20, 20, &m_MeshObjList[2], 0);
+	D3DXCreateCylinder(Device, 0.5f, 0.5f, 2.f, 20, 20, &m_MeshObjList[3], 0);
 
-	CPyramid Pyramid;
-	int iIdx(0);
+	// 월드 행렬
+	D3DXMatrixTranslation(&m_matWorldList[0], 0.f, 2.f, 0.f);
+	D3DXMatrixTranslation(&m_matWorldList[1], 0.f, -2.f, 0.f);
+	D3DXMatrixTranslation(&m_matWorldList[2], -3.f, 0.f, 0.f);
+	D3DXMatrixTranslation(&m_matWorldList[3], 3.f, 0.f, 0.f);
 
-	Vertex* vertices;
-	m_VB->Lock(0, 0, (void**)&vertices, 0);
+	// Material 설정
+	m_mtrlList.emplace_back(d3d::RED_MTRL);
+	m_mtrlList.emplace_back(d3d::BLUE_MTRL);
+	m_mtrlList.emplace_back(d3d::GREEN_MTRL);
+	m_mtrlList.emplace_back(d3d::YELLOW_MTRL);
 
-	for (const Vertex& vtx : Pyramid.GetVtxList())
-		vertices[iIdx++] = vtx;
+	// 방향성 광원 설정
+	D3DXVECTOR3 dir(1.f, 0.f, 0.25f);
+	D3DXCOLOR c = d3d::WHITE;
+	D3DLIGHT9 dirLight = d3d::InitDirectionalLight(&dir, &c);
 
-	m_VB->Unlock();
-
-	// Material 정의
-	D3DMATERIAL9 mtrl;
-	mtrl.Ambient = d3d::WHITE;
-	mtrl.Diffuse = d3d::WHITE;
-	mtrl.Specular = d3d::WHITE;
-	mtrl.Emissive = d3d::BLACK;
-	mtrl.Power = 5.f;
-
-	Device->SetMaterial(&mtrl);
-
-	// 방향성 광원 만들기
-	// - x축과 평행하게 빛 발산 (방향성 광원)
-	D3DLIGHT9 dir;
-	::ZeroMemory(&dir, sizeof(dir));
-	dir.Type = D3DLIGHT_DIRECTIONAL;
-	dir.Diffuse = d3d::WHITE;
-	dir.Specular = d3d::WHITE * 0.3f;
-	dir.Ambient = d3d::WHITE * 0.6f;
-	dir.Direction = D3DXVECTOR3(1.f, 0.f, 0.f);
-
-	// 광원 설정
-	Device->SetLight(0, &dir);
+	// light 설정
+	Device->SetLight(0, &dirLight);
 	Device->LightEnable(0, true);
 
-	// 법선 정리, 정반사광 활성화 
+	// light - render state 설정
 	Device->SetRenderState(D3DRS_NORMALIZENORMALS, true);
-	Device->SetRenderState(D3DRS_SPECULARENABLE, true);
+	Device->SetRenderState(D3DRS_SPECULARENABLE, false);
 
-	// 뷰 행렬 설정
-	D3DXVECTOR3 pos(0.f, 1.f, -3.f);
-	D3DXVECTOR3 target(0.f, 0.f, 0.f);
-	D3DXVECTOR3 up(0.f, 1.f, 0.f);
-	D3DXMATRIX V;
-	D3DXMatrixLookAtLH(&V, &pos, &target, &up);
-	Device->SetTransform(D3DTS_VIEW, &V); 
+	// 조명 연산을 하겠다고 선언하는 것, 그러나 DX9는 디폴트로 활성되어 있으나 그냥 명시한 것
+	Device->SetRenderState(D3DRS_LIGHTING, true);
 
 	// 투영 행렬 설정
 	D3DXMATRIX proj;
@@ -81,27 +57,35 @@ bool CMainApp::Setup() // Initialize의 역할
 	Device->SetTransform(D3DTS_PROJECTION, &proj);
 
 	return true;
-
-
-
-	return true;
 }
 
 void CMainApp::Cleanup() // Release의 역할
 {
-	d3d::Release<IDirect3DVertexBuffer9*>(m_VB);
 }
 
 void CMainApp::Update(float timeDelta)
 {
-	D3DXMATRIX yRot;
-	static float y = 0.f;
-	D3DXMatrixRotationY(&yRot, y);
-	y += timeDelta;
-	if (y >= 2 * D3DX_PI)
-		y = 0.f;
+	// 카메라 포지션
+	static float angle = (3.f * D3DX_PI) / 2.f; // 270도
+	static float height = 5.f;
 
-	Device->SetTransform(D3DTS_WORLD, &yRot);
+	if (::GetAsyncKeyState(VK_LEFT) & 0x8000F)
+		angle -= 0.5f * timeDelta;
+	if (::GetAsyncKeyState(VK_RIGHT) & 0x8000F)
+		angle += 0.5f * timeDelta;
+	if (::GetAsyncKeyState(VK_UP) & 0x8000F)
+		height += 0.5f * timeDelta;
+	if (::GetAsyncKeyState(VK_DOWN) & 0x8000F)
+		height -= 0.5f * timeDelta;
+
+	// (xz평면)반지름이 7인 원의 원주를 따라서 회전할거다. 
+	D3DXVECTOR3 position(cosf(angle) * 7.f, height, sinf(angle) * 7.f);
+	D3DXVECTOR3 target(0.f, 0.f, 0.f);
+	D3DXVECTOR3 up(0.f, 1.f, 0.f);
+	D3DXMATRIX V;
+	D3DXMatrixLookAtLH(&V, &position, &target, &up);
+	Device->SetTransform(D3DTS_VIEW, &V);
+
 }
 
 bool CMainApp::Display() // Render의 역할
@@ -115,9 +99,13 @@ bool CMainApp::Display() // Render의 역할
 		Device->Clear(0, 0, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, 0x0000000, 1.f, 0);
 		Device->BeginScene();
 		
-		Device->SetStreamSource(0, m_VB, 0, sizeof(Vertex));
-		Device->SetFVF(Vertex::FVF);
-		Device->DrawPrimitive(D3DPT_TRIANGLELIST, 0, 4);
+		for (int i = 0; i < m_MeshObjList.size(); ++i)
+		{
+			Device->SetMaterial(&m_mtrlList[i]);
+			Device->SetTransform(D3DTS_WORLD, &m_matWorldList[i]);
+			m_MeshObjList[i]->DrawSubset(0);
+		}
+		
 
 		Device->EndScene();
 		Device->Present(0, 0, 0, 0); // 후면 버퍼 시연

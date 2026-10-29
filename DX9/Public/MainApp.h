@@ -11,6 +11,8 @@ public:
 	void Update(float timeDelta);
 	bool Display();
 private:
-	IDirect3DVertexBuffer9* m_VB = nullptr;
+	vector<ID3DXMesh*> m_MeshObjList;
+	vector<D3DXMATRIX> m_matWorldList;
+	vector<D3DMATERIAL9> m_mtrlList;
 };
 
