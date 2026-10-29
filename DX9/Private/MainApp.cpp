@@ -8,6 +8,8 @@ CMainApp::~CMainApp()
 
 bool CMainApp::Setup() // Initialize의 역할
 {
+	m_eLightType = LIGHT_TYPE::SPOT;
+
 	m_MeshObjList.resize(4, nullptr);
 	m_matWorldList.resize(4);
 
@@ -29,13 +31,39 @@ bool CMainApp::Setup() // Initialize의 역할
 	m_mtrlList.emplace_back(d3d::GREEN_MTRL);
 	m_mtrlList.emplace_back(d3d::YELLOW_MTRL);
 
-	// 방향성 광원 설정
-	D3DXVECTOR3 dir(1.f, 0.f, 0.25f);
-	D3DXCOLOR c = d3d::WHITE;
-	D3DLIGHT9 dirLight = d3d::InitDirectionalLight(&dir, &c);
+
+	switch (m_eLightType)
+	{
+	case DIRECTIONAL:
+	{
+		// 방향성 광원 설정
+		D3DXVECTOR3 dir(1.f, 0.f, 0.25f);
+		D3DXCOLOR c = d3d::WHITE;
+		D3DLIGHT9 dirLight = d3d::InitDirectionalLight(&dir, &c);
+		Device->SetLight(0, &dirLight);
+		break;
+	}
+	case POINT:
+	{
+		// 점 광원 설정
+		D3DXVECTOR3 pos(0.f, 0.f, 0.f);;
+		D3DXCOLOR c = d3d::WHITE;
+		D3DLIGHT9 point = d3d::InitPointLight(&pos, &c);
+		Device->SetLight(0, &point);
+		break;
+	}
+	case SPOT:
+	{
+		D3DXVECTOR3 pos(0.f, 0.f, -5.f);
+		D3DXVECTOR3 dir(0.f, 0.f, 1.f);
+		D3DXCOLOR c = d3d::WHITE;
+		D3DLIGHT9 spot = d3d::InitSpotLight(&pos, &dir, &c);
+		Device->SetLight(0, &spot);
+		break;
+	}
+	}
 
 	// light 설정
-	Device->SetLight(0, &dirLight);
 	Device->LightEnable(0, true);
 
 	// light - render state 설정
