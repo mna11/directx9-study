@@ -10,5 +10,7 @@ public:
 	void Cleanup();
 	void Update(float timeDelta);
 	bool Display();
+private:
+	IDirect3DVertexBuffer9* m_VB;
 };
 
