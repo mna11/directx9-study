@@ -13,8 +13,8 @@
     <Filter Include="01. Quad">
       <UniqueIdentifier>{87fb1e8b-b52c-4056-800a-8ef6ad6d3896}</UniqueIdentifier>
     </Filter>
-    <Filter Include="02. Teapot">
-      <UniqueIdentifier>{b34acec1-aa33-4cc3-a95a-573920f97fc0}</UniqueIdentifier>
+    <Filter Include="02. Cube">
+      <UniqueIdentifier>{9bafc9b2-bc03-41a7-a7c4-b87daaec4df0}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -43,8 +43,8 @@
     <ClInclude Include="public\Quad.h">
       <Filter>01. Quad</Filter>
     </ClInclude>
-    <ClInclude Include="public\Teapot.h">
-      <Filter>02. Teapot</Filter>
+    <ClInclude Include="public\Cube.h">
+      <Filter>02. Cube</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -63,8 +63,8 @@
     <ClCompile Include="private\Quad.cpp">
       <Filter>01. Quad</Filter>
     </ClCompile>
-    <ClCompile Include="private\Teapot.cpp">
-      <Filter>02. Teapot</Filter>
+    <ClCompile Include="private\Cube.cpp">
+      <Filter>02. Cube</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

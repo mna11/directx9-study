@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 class CQuad;
-class CTeapot;
+class CCube;
 
 class CMainApp
 {
@@ -15,13 +15,10 @@ public:
 	bool Display();
 private:
 	CQuad* m_pQuad;
-	D3DMATERIAL9 m_mtrlQuad;
 	IDirect3DTexture9* m_pTexQuad;
-	D3DXMATRIX m_matWorldQuad;
 
-
-	CTeapot* m_pTeapot;
-	D3DMATERIAL9 m_mtrlTeapot;
-	D3DXMATRIX m_matWorldTeapot;
+	CCube* m_pCube;
+	IDirect3DTexture9* m_pTexCube;
+	D3DXMATRIX m_matWorldCube;
 };
 
