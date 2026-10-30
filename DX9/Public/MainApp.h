@@ -14,6 +14,7 @@ public:
 private: 
 	void RenderScene();
 	void RenderMirror();
+	void RenderShadow();
 private:
 	// 버텍스 버퍼
 	IDirect3DVertexBuffer9* m_VB;

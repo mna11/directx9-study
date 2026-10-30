@@ -166,6 +166,7 @@ bool CMainApp::Display() // Render의 역할
 		Device->BeginScene();
 
 		RenderScene();
+		RenderShadow();
 		RenderMirror();
 
 		Device->EndScene();
@@ -329,4 +330,47 @@ void CMainApp::RenderMirror()
 	Device->SetRenderState(D3DRS_ALPHABLENDENABLE, false);
 	Device->SetRenderState(D3DRS_STENCILENABLE, false);
 	Device->SetRenderState(D3DRS_CULLMODE, D3DCULL_CCW);
+}
+
+void CMainApp::RenderShadow()
+{
+	Device->SetRenderState(D3DRS_STENCILENABLE, true);
+	Device->SetRenderState(D3DRS_STENCILFUNC, D3DCMP_EQUAL);
+	Device->SetRenderState(D3DRS_STENCILREF, 0x0);
+	Device->SetRenderState(D3DRS_STENCILMASK, 0xffffffff);
+	Device->SetRenderState(D3DRS_STENCILWRITEMASK, 0xffffffff);
+	Device->SetRenderState(D3DRS_STENCILZFAIL, D3DSTENCILOP_KEEP);
+	Device->SetRenderState(D3DRS_STENCILFAIL, D3DSTENCILOP_KEEP);
+	Device->SetRenderState(D3DRS_STENCILPASS, D3DSTENCILOP_INCR); // increment to 1 -> 처음만 그려준다.
+
+	// 그림자 구하기
+	D3DXVECTOR4 lightDirection(0.707f, -0.707f, 0.707f, 0.f);
+	D3DXPLANE groundPlane(0.f, -1.f, 0.f, 0.f);
+
+	D3DXMATRIX S;
+	D3DXMatrixShadow(&S, &lightDirection, &groundPlane);
+
+	D3DXMATRIX T;
+	D3DXMatrixTranslation(&T, m_vTeapotPos.x, m_vTeapotPos.y, m_vTeapotPos.z);
+
+	D3DXMATRIX W = T * S;
+	Device->SetTransform(D3DTS_WORLD, &W);
+
+	Device->SetRenderState(D3DRS_ALPHABLENDENABLE, true);
+	Device->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
+	Device->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
+
+	D3DMATERIAL9 mtrl = d3d::InitMtrl(d3d::BLACK, d3d::BLACK, d3d::BLACK, d3d::BLACK, 0.f);
+	mtrl.Diffuse.a = 0.5f;
+
+	// z-경합(fighting) 방지
+	Device->SetRenderState(D3DRS_ZENABLE, false);
+
+	Device->SetMaterial(&mtrl);
+	Device->SetTexture(0, 0);
+	m_pTeapot->DrawSubset(0);
+
+	Device->SetRenderState(D3DRS_ZENABLE, true);
+	Device->SetRenderState(D3DRS_ALPHABLENDENABLE, false);
+	Device->SetRenderState(D3DRS_STENCILENABLE, false);
 }
