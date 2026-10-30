@@ -33,6 +33,9 @@
     <ClInclude Include="pch.h">
       <Filter>99. Defines</Filter>
     </ClInclude>
+    <ClInclude Include="Defines.h">
+      <Filter>99. Defines</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="d3dUtility.cpp">
@@ -43,9 +46,6 @@
     </ClCompile>
     <ClCompile Include="private\MainApp.cpp">
       <Filter>00. MainApp</Filter>
-    </ClCompile>
-    <ClCompile Include="Defines.h">
-      <Filter>99. Defines</Filter>
     </ClCompile>
     <ClCompile Include="pch.cpp">
       <Filter>99. Defines</Filter>
