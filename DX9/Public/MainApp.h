@@ -10,5 +10,7 @@ public:
 	void Cleanup();
 	void Update(float timeDelta);
 	bool Display();
+private:
+	ID3DXMesh* m_Text;
 };
 
