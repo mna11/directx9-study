@@ -33,6 +33,18 @@
     <ClInclude Include="pch.h">
       <Filter>99. Defines</Filter>
     </ClInclude>
+    <ClInclude Include="Defines.h">
+      <Filter>99. Defines</Filter>
+    </ClInclude>
+    <ClInclude Include="d3dfont.h">
+      <Filter>98. Default</Filter>
+    </ClInclude>
+    <ClInclude Include="d3dutil.h">
+      <Filter>98. Default</Filter>
+    </ClInclude>
+    <ClInclude Include="dxutil.h">
+      <Filter>98. Default</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="d3dUtility.cpp">
@@ -44,11 +56,17 @@
     <ClCompile Include="private\MainApp.cpp">
       <Filter>00. MainApp</Filter>
     </ClCompile>
-    <ClCompile Include="Defines.h">
-      <Filter>99. Defines</Filter>
-    </ClCompile>
     <ClCompile Include="pch.cpp">
       <Filter>99. Defines</Filter>
+    </ClCompile>
+    <ClCompile Include="d3dfont.cpp">
+      <Filter>98. Default</Filter>
+    </ClCompile>
+    <ClCompile Include="d3dutil.cpp">
+      <Filter>98. Default</Filter>
+    </ClCompile>
+    <ClCompile Include="dxutil.cpp">
+      <Filter>98. Default</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -1,5 +1,7 @@
 ﻿#pragma once
 
+class CD3DFont;
+
 class CMainApp
 {
 public:
@@ -10,5 +12,11 @@ public:
 	void Cleanup();
 	void Update(float timeDelta);
 	bool Display();
+private:
+	CD3DFont* m_Font;
+	DWORD m_FrameCnt;
+	float m_TimeElapsed;
+	float m_FPS;
+	wstring m_strFPS;
 };
 
