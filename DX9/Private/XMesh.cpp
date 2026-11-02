@@ -1,5 +1,6 @@
 ﻿#include "pch.h"
 #include "XMesh.h"
+#include "BoundingVolume.h"
 
 CXMesh::CXMesh()
 {
@@ -72,6 +73,10 @@ CXMesh::CXMesh()
 		return;
 	}
 
+	// Bounding Volume 생성
+	m_pBoundingVolume = CBoundingVolume::Create(CBoundingVolume::BOX);
+	m_pBoundingVolume->ComputeBoundingBox(m_Mesh);
+	m_pBoundingVolume->ComputeBoundingSphere(m_Mesh);
 }
 
 CXMesh::~CXMesh()
@@ -79,6 +84,8 @@ CXMesh::~CXMesh()
 	d3d::Release<ID3DXMesh*>(m_Mesh);
 	for (int i = 0; i < m_Tex.size(); ++i)
 		d3d::Release<IDirect3DTexture9*>(m_Tex[i]);
+
+	delete m_pBoundingVolume;
 }
 
 void CXMesh::Render()
@@ -89,4 +96,6 @@ void CXMesh::Render()
 		Device->SetTexture(0, m_Tex[i]);
 		m_Mesh->DrawSubset(i);
 	}
+
+	m_pBoundingVolume->Render();
 }

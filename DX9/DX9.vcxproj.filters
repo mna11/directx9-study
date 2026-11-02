@@ -10,6 +10,12 @@
     <Filter Include="99. Defines">
       <UniqueIdentifier>{831180a4-f275-4e48-84e4-d468b6d16fe5}</UniqueIdentifier>
     </Filter>
+    <Filter Include="02. XMesh">
+      <UniqueIdentifier>{45886b85-07c5-4f8f-a33f-73927b04baeb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="01. BoundingVolume">
+      <UniqueIdentifier>{382045ae-b1a5-408a-ae59-71f5f5743cd4}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="d3dUtility.h">
@@ -33,6 +39,15 @@
     <ClInclude Include="pch.h">
       <Filter>99. Defines</Filter>
     </ClInclude>
+    <ClInclude Include="Defines.h">
+      <Filter>99. Defines</Filter>
+    </ClInclude>
+    <ClInclude Include="public\BoundingVolume.h">
+      <Filter>01. BoundingVolume</Filter>
+    </ClInclude>
+    <ClInclude Include="public\XMesh.h">
+      <Filter>02. XMesh</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="d3dUtility.cpp">
@@ -44,11 +59,14 @@
     <ClCompile Include="private\MainApp.cpp">
       <Filter>00. MainApp</Filter>
     </ClCompile>
-    <ClCompile Include="Defines.h">
-      <Filter>99. Defines</Filter>
-    </ClCompile>
     <ClCompile Include="pch.cpp">
       <Filter>99. Defines</Filter>
+    </ClCompile>
+    <ClCompile Include="private\BoundingVolume.cpp">
+      <Filter>01. BoundingVolume</Filter>
+    </ClCompile>
+    <ClCompile Include="private\XMesh.cpp">
+      <Filter>02. XMesh</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

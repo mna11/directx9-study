@@ -1,5 +1,6 @@
 ﻿#include "pch.h"
 #include "d3dUtility.h"
+#include "BoundingVolume.h"
 
 bool d3d::InitD3D(HINSTANCE hInstance, int width, int height, bool windowed, 
 	D3DDEVTYPE deviceType, IDirect3DDevice9** device)

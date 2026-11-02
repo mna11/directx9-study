@@ -2,6 +2,7 @@
 #include "MainApp.h"
 
 #include "XMesh.h"
+#include "BoundingVolume.h"
 
 CMainApp::~CMainApp()
 {
@@ -29,7 +30,7 @@ bool CMainApp::Setup() // Initialize의 역할
 	Device->SetRenderState(D3DRS_SPECULARENABLE, true);
 
 	// 뷰 행렬
-	D3DXVECTOR3 pos(4.f, 4.f, -13.f);
+	D3DXVECTOR3 pos(4.f, 12.f, -20.f);
 	D3DXVECTOR3 target(0.f, 0.f, 0.f);
 	D3DXVECTOR3 up(0.f, 1.f, 0.f);
 
@@ -58,6 +59,7 @@ bool CMainApp::Setup() // Initialize의 역할
 
 void CMainApp::Cleanup() // Release의 역할
 {
+	delete m_Mesh;
 }
 
 void CMainApp::Update(float timeDelta)
@@ -71,6 +73,11 @@ void CMainApp::Update(float timeDelta)
 
 	D3DXMATRIX world = yRot;
 	Device->SetTransform(D3DTS_WORLD, &world);
+
+	if (::GetAsyncKeyState('1') & 0x8000)
+		m_Mesh->GetBoundingVolume()->SetBoundType(CBoundingVolume::BOX);
+	if (::GetAsyncKeyState('2') & 0x8000)
+		m_Mesh->GetBoundingVolume()->SetBoundType(CBoundingVolume::SPHERE);
 }
 
 bool CMainApp::Display() // Render의 역할

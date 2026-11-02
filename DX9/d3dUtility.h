@@ -77,4 +77,8 @@ namespace d3d
 	const D3DMATERIAL9 GREEN_MTRL = InitMtrl(GREEN, GREEN, GREEN, BLACK, 8.f);
 	const D3DMATERIAL9 BLUE_MTRL = InitMtrl(BLUE, BLUE, BLUE, BLACK, 8.f);
 	const D3DMATERIAL9 YELLOW_MTRL = InitMtrl(YELLOW, YELLOW, YELLOW, BLACK, 8.f);
+
+	// 상수
+	const float D3DINFINITY = FLT_MAX;
+	const float D3DEPSILON = 0.001f;
 }

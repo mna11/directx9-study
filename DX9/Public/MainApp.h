@@ -12,6 +12,7 @@ public:
 	void Cleanup();
 	void Update(float timeDelta);
 	bool Display();
+
 private:
 	CXMesh* m_Mesh;
 };
