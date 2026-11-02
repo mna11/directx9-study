@@ -6,6 +6,7 @@
 #include <vector>
 #include <map>
 #include <algorithm>
+#include <string>
 
 #include "Defines.h"
 #include "d3dUtility.h"

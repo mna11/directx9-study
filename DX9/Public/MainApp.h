@@ -1,5 +1,7 @@
 ﻿#pragma once
 
+class CXMesh;
+
 class CMainApp
 {
 public:
@@ -10,5 +12,7 @@ public:
 	void Cleanup();
 	void Update(float timeDelta);
 	bool Display();
+private:
+	CXMesh* m_Mesh;
 };
 
