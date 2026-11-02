@@ -9,7 +9,8 @@ CXMesh::CXMesh()
 	ID3DXBuffer* adjBuffer = 0;
 	ID3DXBuffer* mtrlBuffer = 0;
 	DWORD		 numMtrls = 0;
-
+	
+	ID3DXMesh* pSourceMesh;
 	hr = D3DXLoadMeshFromX(
 		L"./Bin/Resource/bigship1.x",
 		D3DXMESH_MANAGED,
@@ -18,7 +19,7 @@ CXMesh::CXMesh()
 		&mtrlBuffer,
 		0,
 		&numMtrls,
-		&m_Mesh
+		&pSourceMesh
 	);
 
 	if (FAILED(hr))
@@ -58,25 +59,50 @@ CXMesh::CXMesh()
 	d3d::Release<ID3DXBuffer*>(mtrlBuffer);
 
 	// 메시 최적화
-	hr = m_Mesh->OptimizeInplace(
+	hr = pSourceMesh->OptimizeInplace(
 		D3DXMESHOPT_ATTRSORT |
 		D3DXMESHOPT_COMPACT |
 		D3DXMESHOPT_VERTEXCACHE,
 		(DWORD*)adjBuffer->GetBufferPointer(),
-		0, 0, 0
+		(DWORD*)adjBuffer->GetBufferPointer(), // 새로 얻은 최적화 후 인접 정보
+		0, 0
 	);
-	d3d::Release<ID3DXBuffer*>(adjBuffer);
+
 	if (FAILED(hr))
 	{
 		::MessageBox(0, L"OptimizeInplace - FAILED", 0, 0);
 		return;
 	}
 
+	// 프로그레시브 메쉬 생성하기
+	hr = D3DXGeneratePMesh(
+		pSourceMesh,
+		(DWORD*)adjBuffer->GetBufferPointer(),
+		0,
+		0,
+		1,
+		D3DXMESHSIMP_FACE,
+		&m_PMesh
+	);
+
+	d3d::Release<ID3DXMesh*>(pSourceMesh);
+	d3d::Release<ID3DXBuffer*>(adjBuffer);
+
+	if (FAILED(hr))
+	{
+		::MessageBox(0, L"D3DXGeneratePMesh() - FAILED", 0, 0);
+		return;
+	}
+
+	// 현재 최대 메쉬 개수
+	DWORD maxFaces = m_PMesh->GetMaxFaces();
+	m_PMesh->SetNumFaces(maxFaces);
+
 }
 
 CXMesh::~CXMesh()
 {
-	d3d::Release<ID3DXMesh*>(m_Mesh);
+	d3d::Release<ID3DXPMesh*>(m_PMesh);
 	for (int i = 0; i < m_Tex.size(); ++i)
 		d3d::Release<IDirect3DTexture9*>(m_Tex[i]);
 }
@@ -87,6 +113,11 @@ void CXMesh::Render()
 	{
 		Device->SetMaterial(&m_Mtrl[i]);
 		Device->SetTexture(0, m_Tex[i]);
-		m_Mesh->DrawSubset(i);
+		m_PMesh->DrawSubset(i);
+
+		Device->SetMaterial(&d3d::YELLOW_MTRL);
+		Device->SetRenderState(D3DRS_FILLMODE, D3DFILL_WIREFRAME);
+		m_PMesh->DrawSubset(i);
+		Device->SetRenderState(D3DRS_FILLMODE, D3DFILL_SOLID);
 	}
 }

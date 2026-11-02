@@ -62,15 +62,17 @@ void CMainApp::Cleanup() // Release의 역할
 
 void CMainApp::Update(float timeDelta)
 {
-	static float y = 0.f;
-	D3DXMATRIX yRot;
-	D3DXMatrixRotationY(&yRot, y);
-	y += timeDelta * 0.5f;
-	if (y >= 2 * D3DX_PI)
-		y = 0.f;
+	int numFaces = m_Mesh->GetMesh()->GetNumFaces();
 
-	D3DXMATRIX world = yRot;
-	Device->SetTransform(D3DTS_WORLD, &world);
+	if (::GetAsyncKeyState('A') & 0x8000)
+	{
+		m_Mesh->GetMesh()->SetNumFaces(numFaces + 1);
+		if (m_Mesh->GetMesh()->GetNumFaces() == numFaces)
+			m_Mesh->GetMesh()->SetNumFaces(numFaces + 2);
+	}
+
+	if (::GetAsyncKeyState('S') & 0x8000)
+		m_Mesh->GetMesh()->SetNumFaces(numFaces - 1);
 }
 
 bool CMainApp::Display() // Render의 역할
