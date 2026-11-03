@@ -4,6 +4,7 @@
 #include "Camera.h"
 #include "Snow.h"
 #include "Firework.h"
+#include "ParticleGun.h"
 #include "BoundingVolume.h"
 
 CMainApp::~CMainApp()
@@ -34,6 +35,11 @@ bool CMainApp::Setup() // Initialize의 역할
 		m_pParticle = new psys::CFirework(&origin, 6000);
 		m_pParticle->Init(L"./Bin/Resource/flare.bmp");
 		break;
+	}
+	case GUN:
+	{
+		m_pParticle = new psys::CParticleGun(m_pCamera);
+		m_pParticle->Init(L"./Bin/Resource/flare_alpha.dds");
 	}
 	default:
 		break;
@@ -233,4 +239,10 @@ void CMainApp::KeyInput(float timeDelta)
 		m_pCamera->Roll(1.f * timeDelta);
 	if (::GetAsyncKeyState('M') & 0x8000)
 		m_pCamera->Roll(-1.f * timeDelta);
+
+	if (m_eParticleType == GUN)
+	{
+		if (::GetAsyncKeyState(VK_SPACE) & 0x8000)
+			m_pParticle->AddParticle();
+	}
 }

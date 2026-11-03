@@ -10,6 +10,24 @@
     <Filter Include="99. Defines">
       <UniqueIdentifier>{831180a4-f275-4e48-84e4-d468b6d16fe5}</UniqueIdentifier>
     </Filter>
+    <Filter Include="01. BoundingVolume">
+      <UniqueIdentifier>{ed26575c-c3a4-419f-8383-1403e8d47139}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="02. Camera">
+      <UniqueIdentifier>{c7ed01f3-9ae2-4e79-ba9f-04f66e375e57}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. PSystem">
+      <UniqueIdentifier>{98327bea-9bee-4235-ab2f-6763683f9937}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. PSystem\00. Snow">
+      <UniqueIdentifier>{15d995ed-ab32-441e-bac7-a492146ab87d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. PSystem\01. Firework">
+      <UniqueIdentifier>{c26495a1-1cd4-47a5-9df9-67705413f274}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. PSystem\02. ParticleGun">
+      <UniqueIdentifier>{39f040c7-e45a-4cd2-8f6f-4c71d4099959}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="d3dUtility.h">
@@ -33,6 +51,27 @@
     <ClInclude Include="pch.h">
       <Filter>99. Defines</Filter>
     </ClInclude>
+    <ClInclude Include="Public\BoundingVolume.h">
+      <Filter>01. BoundingVolume</Filter>
+    </ClInclude>
+    <ClInclude Include="public\Camera.h">
+      <Filter>02. Camera</Filter>
+    </ClInclude>
+    <ClInclude Include="Defines.h">
+      <Filter>99. Defines</Filter>
+    </ClInclude>
+    <ClInclude Include="public\Snow.h">
+      <Filter>03. PSystem\00. Snow</Filter>
+    </ClInclude>
+    <ClInclude Include="public\PSystem.h">
+      <Filter>03. PSystem</Filter>
+    </ClInclude>
+    <ClInclude Include="public\Firework.h">
+      <Filter>03. PSystem\01. Firework</Filter>
+    </ClInclude>
+    <ClInclude Include="public\ParticleGun.h">
+      <Filter>03. PSystem\02. ParticleGun</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="d3dUtility.cpp">
@@ -44,11 +83,26 @@
     <ClCompile Include="private\MainApp.cpp">
       <Filter>00. MainApp</Filter>
     </ClCompile>
-    <ClCompile Include="Defines.h">
-      <Filter>99. Defines</Filter>
-    </ClCompile>
     <ClCompile Include="pch.cpp">
       <Filter>99. Defines</Filter>
+    </ClCompile>
+    <ClCompile Include="Private\BoundingVolume.cpp">
+      <Filter>01. BoundingVolume</Filter>
+    </ClCompile>
+    <ClCompile Include="private\Camera.cpp">
+      <Filter>02. Camera</Filter>
+    </ClCompile>
+    <ClCompile Include="private\Snow.cpp">
+      <Filter>03. PSystem\00. Snow</Filter>
+    </ClCompile>
+    <ClCompile Include="private\PSystem.cpp">
+      <Filter>03. PSystem</Filter>
+    </ClCompile>
+    <ClCompile Include="private\Firework.cpp">
+      <Filter>03. PSystem\01. Firework</Filter>
+    </ClCompile>
+    <ClCompile Include="private\ParticleGun.cpp">
+      <Filter>03. PSystem\02. ParticleGun</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

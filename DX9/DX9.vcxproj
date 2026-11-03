@@ -147,6 +147,7 @@
     <ClInclude Include="public\Camera.h" />
     <ClInclude Include="public\Firework.h" />
     <ClInclude Include="public\MainApp.h" />
+    <ClInclude Include="public\ParticleGun.h" />
     <ClInclude Include="public\PSystem.h" />
     <ClInclude Include="public\Snow.h" />
     <ClInclude Include="Resource.h" />
@@ -163,6 +164,7 @@
     <ClCompile Include="private\Camera.cpp" />
     <ClCompile Include="private\Firework.cpp" />
     <ClCompile Include="private\MainApp.cpp" />
+    <ClCompile Include="private\ParticleGun.cpp" />
     <ClCompile Include="private\PSystem.cpp" />
     <ClCompile Include="private\Snow.cpp" />
     <ClCompile Include="WinMain.cpp" />

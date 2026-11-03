@@ -71,9 +71,12 @@ void CFirework::PreRender()
 {
 	__super::PreRender();
 
+	// 불꽃은 SRC와 DEST의 색을 더해서 계산한다. - 겹칠 수록 밝아짐
 	Device->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_ONE);
 	Device->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_ONE);
 
+	// 그런데 깊이 버퍼가 켜져있으면, 뒤쪽 불꽃이 더해지지 못할 수 있음
+	// 깊이 기록만 끈거지 깊이 비교는 유지해서 불꽃과 다른 물체들끼리는 깊이 비교함
 	Device->SetRenderState(D3DRS_ZWRITEENABLE, false);
 }
 
