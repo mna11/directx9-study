@@ -24,6 +24,7 @@ bool CMainApp::Setup() // Initialize의 역할
 	D3DXVECTOR3 lightDirection(0.f, 1.f, 0.f);
 	m_pTerrain = new CTerrain(L"./Bin/Resource/coastMountain64.raw", 64, 64, 10, 0.5f);
 	m_pTerrain->GenTexture(&lightDirection);
+	//m_pTerrain->LoadTexture(L"./Bin/Resource/grass.bmp");
 
 	// FPS 생성 
 	m_pFPS = new CFPSCounter;
@@ -87,7 +88,7 @@ bool CMainApp::Display() // Render의 역할
 		D3DXMATRIX I;
 		D3DXMatrixIdentity(&I);
 		if (m_pTerrain)
-			m_pTerrain->Render(&I, false);
+			m_pTerrain->Render(&I, true);
 		if (m_pFPS)
 			m_pFPS->Render(0xffffffff);
 
