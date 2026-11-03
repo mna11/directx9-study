@@ -2,6 +2,9 @@
 #include "MainApp.h"
 
 #include "Camera.h"
+#include "Snow.h"
+#include "Firework.h"
+#include "BoundingVolume.h"
 
 CMainApp::~CMainApp()
 {
@@ -10,7 +13,32 @@ CMainApp::~CMainApp()
 
 bool CMainApp::Setup() // Initialize의 역할
 {
+	srand((unsigned int)time(0));
+
 	m_pCamera = new CCamera;
+
+	switch (m_eParticleType)
+	{
+	case SNOW:
+	{
+		CBoundingVolume* pBBox = CBoundingVolume::Create(CBoundingVolume::BOX);
+		pBBox->SetMin({ -10.f, -10.f, -10.f });
+		pBBox->SetMax({ 10.f, 10.f, 10.f });
+		m_pParticle = new psys::CSnow(pBBox, 5000);
+		m_pParticle->Init(L"./Bin/Resource/snowflake.dds");
+		break;
+	}
+	case FIREWORK:
+	{
+		D3DXVECTOR3 origin(0.f, 10.f, 50.f);
+		m_pParticle = new psys::CFirework(&origin, 6000);
+		m_pParticle->Init(L"./Bin/Resource/flare.bmp");
+		break;
+	}
+	default:
+		break;
+	}
+
 
 	DrawBasicScene(false, 0.f); // 기본 씬 초기화
 
@@ -20,7 +48,7 @@ bool CMainApp::Setup() // Initialize의 역할
 		D3DX_PI * 0.25f,
 		(float)g_iWinSizeX / (float)g_iWinSizeY,
 		1.f,
-		1000.f
+		5000.f
 	);
 	Device->SetTransform(D3DTS_PROJECTION, &proj);
 
@@ -30,7 +58,8 @@ bool CMainApp::Setup() // Initialize의 역할
 void CMainApp::Cleanup() // Release의 역할
 {
 	DrawBasicScene(true, 0.f);
-	delete m_pCamera;
+	d3d::Delete<CCamera*>(m_pCamera);
+	d3d::Delete<psys::CPSystem*>(m_pParticle);
 }
 
 void CMainApp::Update(float timeDelta)
@@ -41,6 +70,14 @@ void CMainApp::Update(float timeDelta)
 	D3DXMATRIX V;
 	m_pCamera->GetViewMatrix(&V);
 	Device->SetTransform(D3DTS_VIEW, &V);
+
+	m_pParticle->Update(timeDelta);
+
+	if (m_eParticleType == FIREWORK)
+	{
+		if (m_pParticle->IsDead())
+			m_pParticle->reset();
+	}
 }
 
 bool CMainApp::Display() // Render의 역할
@@ -54,7 +91,14 @@ bool CMainApp::Display() // Render의 역할
 		Device->Clear(0, 0, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, 0x0000000, 1.f, 0);
 		Device->BeginScene();
 
+		D3DXMATRIX I;
+		D3DXMatrixIdentity(&I);
+		Device->SetTransform(D3DTS_WORLD, &I);
+
 		DrawBasicScene(false, 1.f);
+
+		Device->SetTransform(D3DTS_WORLD, &I);
+		m_pParticle->Render();
 
 		Device->EndScene();
 		Device->Present(0, 0, 0, 0); // 후면 버퍼 시연

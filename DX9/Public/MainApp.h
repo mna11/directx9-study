@@ -2,8 +2,14 @@
 
 class CCamera;
 
+namespace psys {
+	class CPSystem;
+}
+
 class CMainApp
 {
+public:
+	enum PARTICLE_TYPE { SNOW, FIREWORK, END };
 public:
 	CMainApp() = default;
 	~CMainApp();
@@ -16,6 +22,8 @@ private:
 	bool DrawBasicScene(bool bClear, float fScale);	
 	void KeyInput(float timeDelta);
 private:
+	PARTICLE_TYPE m_eParticleType{ FIREWORK };
 	CCamera* m_pCamera{nullptr};
+	psys::CPSystem* m_pParticle{nullptr};
 };
 

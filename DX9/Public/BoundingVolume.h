@@ -9,6 +9,11 @@ public:
 	~CBoundingVolume();
 
 public:
+	D3DXVECTOR3& GetMin() { return m_vMin; }
+	D3DXVECTOR3& GetMax() { return m_vMax; }
+	void SetMin(D3DXVECTOR3 vMin) { m_vMin = vMin; }
+	void SetMax(D3DXVECTOR3 vMax) { m_vMax = vMax; }
+	
 	void SetBoundType(BOUND_TYPE eType) { m_eType = eType; }
 	bool isPointInside(D3DXVECTOR3& p);
 	bool ComputeBoundingSphere(ID3DXMesh* mesh);

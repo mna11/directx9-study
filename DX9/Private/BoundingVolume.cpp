@@ -34,6 +34,8 @@ bool CBoundingVolume::isPointInside(D3DXVECTOR3& p)
 		}
 
 		break;
+	default:
+		return false;
 	}
 }
 

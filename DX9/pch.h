@@ -6,6 +6,8 @@
 #include <vector>
 #include <map>
 #include <algorithm>
+#include <string>
+#include <ctime>
 
 #include "Defines.h"
 #include "d3dUtility.h"
