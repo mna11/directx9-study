@@ -35,6 +35,11 @@ namespace d3d
 	// 함수는 디스플레이 함수가 될 함수의 포인터를 받음
 	int EnterMsgLoop(std::function<void(float)> ptr_update, std::function<bool()> ptr_display);
 
+	float GetRandomFloat(float lowBound, float highBound);
+	void GetRandomVector(D3DXVECTOR3* out, D3DXVECTOR3* min, D3DXVECTOR3* max);
+	DWORD FtoDw(float f);
+	float Lerp(float a, float b, float t);
+
 	// 메인 애플리케이션 윈도우를 위한 윈도우 프로시저
 	LRESULT CALLBACK WndProc(
 		HWND hWnd,
@@ -70,6 +75,20 @@ namespace d3d
 	const D3DXCOLOR	YELLOW(D3DCOLOR_XRGB(255, 255, 0));
 	const D3DXCOLOR	CYAN(D3DCOLOR_XRGB(0, 255, 255));
 	const D3DXCOLOR	MAGENTA(D3DCOLOR_XRGB(255, 0, 255));
+
+	const D3DXCOLOR BEACH_SAND(D3DCOLOR_XRGB(255, 249, 157));
+	const D3DXCOLOR DESERT_SAND(D3DCOLOR_XRGB(250, 205, 135));
+
+	const D3DXCOLOR LIGHTGREEN(D3DCOLOR_XRGB(60, 184, 120));
+	const D3DXCOLOR  PUREGREEN(D3DCOLOR_XRGB(0, 166, 81));
+	const D3DXCOLOR  DARKGREEN(D3DCOLOR_XRGB(0, 114, 54));
+
+	const D3DXCOLOR LIGHT_YELLOW_GREEN(D3DCOLOR_XRGB(124, 197, 118));
+	const D3DXCOLOR  PURE_YELLOW_GREEN(D3DCOLOR_XRGB(57, 181, 74));
+	const D3DXCOLOR  DARK_YELLOW_GREEN(D3DCOLOR_XRGB(25, 123, 48));
+
+	const D3DXCOLOR LIGHTBROWN(D3DCOLOR_XRGB(198, 156, 109));
+	const D3DXCOLOR DARKBROWN(D3DCOLOR_XRGB(115, 100, 87));
 
 	// 조명 - embient가 BLACK이다 : 빛을 발산하지 않는다.
 	const D3DMATERIAL9 WHITE_MTRL	= InitMtrl(WHITE, WHITE, WHITE, BLACK, 8.f);

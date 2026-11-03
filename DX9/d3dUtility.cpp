@@ -192,6 +192,36 @@ int d3d::EnterMsgLoop(std::function<void(float)> ptr_update, std::function<bool(
 	return Message.wParam;
 }
 
+float d3d::GetRandomFloat(float lowBound, float highBound)
+{
+	if (lowBound >= highBound) // bad input
+		return lowBound;
+
+	// [0, 1] 사이의 랜덤 float
+	float f = (rand() % 10000) * 0.0001f;
+
+	return (f * (highBound - lowBound) + lowBound);
+}
+
+void d3d::GetRandomVector(D3DXVECTOR3* out, D3DXVECTOR3* min, D3DXVECTOR3* max)
+{
+	out->x = GetRandomFloat(min->x, max->x);
+	out->y = GetRandomFloat(min->y, max->y);
+	out->z = GetRandomFloat(min->z, max->z);
+}
+
+DWORD d3d::FtoDw(float f)
+{
+	return *((DWORD*)&f);
+}
+
+// 선형 보간
+float d3d::Lerp(float a, float b, float t)
+{
+	return (a + (b - a) * t);
+}
+
+
 LRESULT CALLBACK d3d::WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
 	switch (msg)

@@ -1,11 +1,13 @@
 ﻿#pragma once
 
 class CCamera;
+class CTerrain;
+class CFPSCounter;
 
 class CMainApp
 {
 public:
-	CMainApp() = default;
+	CMainApp();
 	~CMainApp();
 public: 
 	bool Setup();
@@ -16,6 +18,8 @@ private:
 	bool DrawBasicScene(bool bClear, float fScale);	
 	void KeyInput(float timeDelta);
 private:
-	CCamera* m_pCamera{nullptr};
+	CCamera*  m_pCamera;
+	CTerrain* m_pTerrain;
+	CFPSCounter* m_pFPS;
 };
 

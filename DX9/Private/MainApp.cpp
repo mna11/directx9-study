@@ -2,6 +2,13 @@
 #include "MainApp.h"
 
 #include "Camera.h"
+#include "Terrain.h"
+#include "FPSCounter.h"
+
+CMainApp::CMainApp()
+	: m_pFPS{nullptr}, m_pTerrain{nullptr}, m_pCamera{nullptr}
+{
+}
 
 CMainApp::~CMainApp()
 {
@@ -10,10 +17,23 @@ CMainApp::~CMainApp()
 
 bool CMainApp::Setup() // Initialize의 역할
 {
-	m_pCamera = new CCamera;
+	// 카메라 생성
+	m_pCamera = new CCamera(CCamera::LANDOBJECT);
 
-	DrawBasicScene(false, 0.f); // 기본 씬 초기화
+	// 지형 생성 
+	D3DXVECTOR3 lightDirection(0.f, 1.f, 0.f);
+	m_pTerrain = new CTerrain(L"./Bin/Resource/coastMountain64.raw", 64, 64, 10, 0.5f);
+	m_pTerrain->GenTexture(&lightDirection);
 
+	// FPS 생성 
+	m_pFPS = new CFPSCounter;
+
+	// 텍스처 필터 설정
+	Device->SetSamplerState(0, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR);
+	Device->SetSamplerState(0, D3DSAMP_MINFILTER, D3DTEXF_LINEAR);
+	Device->SetSamplerState(0, D3DSAMP_MIPFILTER, D3DTEXF_POINT);
+
+	// 투영 행렬
 	D3DXMATRIX proj;
 	D3DXMatrixPerspectiveFovLH(
 		&proj,
@@ -29,18 +49,28 @@ bool CMainApp::Setup() // Initialize의 역할
 
 void CMainApp::Cleanup() // Release의 역할
 {
-	DrawBasicScene(true, 0.f);
-	delete m_pCamera;
+	d3d::Delete<CCamera*>(m_pCamera);
+	d3d::Delete<CTerrain*>(m_pTerrain);
+	d3d::Delete<CFPSCounter*>(m_pFPS);
 }
 
 void CMainApp::Update(float timeDelta)
 {
 	KeyInput(timeDelta);
 
+	D3DXVECTOR3 pos;
+	m_pCamera->GetPosition(&pos);
+	float height = m_pTerrain->GetHeight(pos.x, pos.z);
+	pos.y = height + 5.f;
+	m_pCamera->SetPosition(&pos);
+
 	// 뷰 행렬
 	D3DXMATRIX V;
 	m_pCamera->GetViewMatrix(&V);
 	Device->SetTransform(D3DTS_VIEW, &V);
+
+	if (m_pFPS)
+		m_pFPS->Update(timeDelta);
 }
 
 bool CMainApp::Display() // Render의 역할
@@ -51,10 +81,15 @@ bool CMainApp::Display() // Render의 역할
 		// 전체 화면을 지우겠다 (0, 0)
 		// Target Surface와 깊이 버퍼를 지우겠다.
 		// 검정색, z 값은 1로 (가장 멀게), 스텐실은 0으로
-		Device->Clear(0, 0, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, 0x0000000, 1.f, 0);
+		Device->Clear(0, 0, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, 0xff000000, 1.f, 0);
 		Device->BeginScene();
 
-		DrawBasicScene(false, 1.f);
+		D3DXMATRIX I;
+		D3DXMatrixIdentity(&I);
+		if (m_pTerrain)
+			m_pTerrain->Render(&I, false);
+		if (m_pFPS)
+			m_pFPS->Render(0xffffffff);
 
 		Device->EndScene();
 		Device->Present(0, 0, 0, 0); // 후면 버퍼 시연
@@ -161,14 +196,14 @@ void CMainApp::KeyInput(float timeDelta)
 {
 	// 앞 뒤 이동
 	if (::GetAsyncKeyState('W') & 0x8000)
-		m_pCamera->Walk(4.f * timeDelta);
+		m_pCamera->Walk(100.f * timeDelta);
 	if (::GetAsyncKeyState('S') & 0x8000)
-		m_pCamera->Walk(-4.f * timeDelta);
+		m_pCamera->Walk(-100.f * timeDelta);
 	// 좌 우 이동
 	if (::GetAsyncKeyState('A') & 0x8000)
-		m_pCamera->Strafe(-4.f * timeDelta);
+		m_pCamera->Strafe(-100.f * timeDelta);
 	if (::GetAsyncKeyState('D') & 0x8000)
-		m_pCamera->Strafe(4.f * timeDelta);
+		m_pCamera->Strafe(100.f * timeDelta);
 	// 상 하 이동
 	if (::GetAsyncKeyState('R') & 0x8000)
 		m_pCamera->Fly(4.f * timeDelta);
