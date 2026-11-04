@@ -29,8 +29,15 @@ namespace Client
 		static const DWORD FVF;
 	};
 	const DWORD ColorVertex::FVF = D3DFVF_XYZ | D3DFVF_DIFFUSE;
+
+	struct Ray
+	{
+		D3DXVECTOR3 _origin;
+		D3DXVECTOR3 _direction;
+	};
 }
 
 using namespace Client;
+extern HWND g_hWnd;
 extern IDirect3DDevice9* Device;
 

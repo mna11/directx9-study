@@ -2,6 +2,7 @@
 #include "MainApp.h"
 
 #include "Camera.h"
+#include "BoundingVolume.h"
 
 CMainApp::~CMainApp()
 {
@@ -10,9 +11,29 @@ CMainApp::~CMainApp()
 
 bool CMainApp::Setup() // Initialize의 역할
 {
-	m_pCamera = new CCamera;
+	D3DXCreateTeapot(Device, &m_pTeapot, 0);
+	m_pBSphere = CBoundingVolume::Create(CBoundingVolume::SPHERE);
+	m_pBSphere->ComputeBoundingSphere(m_pTeapot);
 
-	DrawBasicScene(false, 0.f); // 기본 씬 초기화
+	// SetLight
+	D3DXVECTOR3 dir(0.707f, -0.f, 0.707f); 
+	D3DXCOLOR col(1.f, 1.f, 1.f, 1.f);
+	D3DLIGHT9 light = d3d::InitDirectionalLight(&dir, &col);
+
+	Device->SetLight(0, &light);
+	Device->LightEnable(0, true);
+	Device->SetRenderState(D3DRS_SPECULARENABLE, true);
+	Device->SetRenderState(D3DRS_NORMALIZENORMALS, true);
+
+	// 뷰 매트릭스 설정
+	D3DXVECTOR3 pos(0.f, 0.f, -10.f);
+	D3DXVECTOR3 target(0.f, 0.f, 0.f);
+	D3DXVECTOR3 up(0.f, 1.f, 0.f);
+
+	D3DXMATRIX V;
+	D3DXMatrixLookAtLH(&V, &pos, &target, &up);
+	Device->SetTransform(D3DTS_VIEW, &V);
+
 
 	D3DXMATRIX proj;
 	D3DXMatrixPerspectiveFovLH(
@@ -29,18 +50,28 @@ bool CMainApp::Setup() // Initialize의 역할
 
 void CMainApp::Cleanup() // Release의 역할
 {
-	DrawBasicScene(true, 0.f);
-	delete m_pCamera;
+	d3d::Release<ID3DXMesh*>(m_pTeapot);
+	d3d::Delete<CBoundingVolume*>(m_pBSphere);
 }
 
 void CMainApp::Update(float timeDelta)
 {
 	KeyInput(timeDelta);
 
-	// 뷰 행렬
-	D3DXMATRIX V;
-	m_pCamera->GetViewMatrix(&V);
-	Device->SetTransform(D3DTS_VIEW, &V);
+	// update Teapot
+	static float r = 0.f;
+	static float v = 1.f;
+	static float angle = 0.f;
+	D3DXMatrixTranslation(&m_matWorld, cosf(angle) * r, sinf(angle) * r, 10.f);
+	m_pBSphere->SetCenter(D3DXVECTOR3(cosf(angle) * r, sinf(angle) * r, 10.f));
+
+	r += v * timeDelta;
+	if (r >= 8.f || r <= 0.f)
+		v = -v;
+
+	angle += 1.f * D3DX_PI * timeDelta;
+	if (angle >= 2 * D3DX_PI)
+		angle = 0.f;
 }
 
 bool CMainApp::Display() // Render의 역할
@@ -54,7 +85,13 @@ bool CMainApp::Display() // Render의 역할
 		Device->Clear(0, 0, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, 0x0000000, 1.f, 0);
 		Device->BeginScene();
 
-		DrawBasicScene(false, 1.f);
+		// 주전자 렌더
+		Device->SetTransform(D3DTS_WORLD, &m_matWorld);
+		Device->SetMaterial(&d3d::YELLOW_MTRL);
+		m_pTeapot->DrawSubset(0);
+
+		// BSphere 렌더
+		m_pBSphere->Render();
 
 		Device->EndScene();
 		Device->Present(0, 0, 0, 0); // 후면 버퍼 시연
@@ -159,34 +196,81 @@ bool CMainApp::DrawBasicScene(bool bClear, float fScale)
 
 void CMainApp::KeyInput(float timeDelta)
 {
-	// 앞 뒤 이동
-	if (::GetAsyncKeyState('W') & 0x8000)
-		m_pCamera->Walk(4.f * timeDelta);
-	if (::GetAsyncKeyState('S') & 0x8000)
-		m_pCamera->Walk(-4.f * timeDelta);
-	// 좌 우 이동
-	if (::GetAsyncKeyState('A') & 0x8000)
-		m_pCamera->Strafe(-4.f * timeDelta);
-	if (::GetAsyncKeyState('D') & 0x8000)
-		m_pCamera->Strafe(4.f * timeDelta);
-	// 상 하 이동
-	if (::GetAsyncKeyState('R') & 0x8000)
-		m_pCamera->Fly(4.f * timeDelta);
-	if (::GetAsyncKeyState('F') & 0x8000)
-		m_pCamera->Fly(-4.f * timeDelta);
-	// Pitch
-	if (::GetAsyncKeyState(VK_UP) & 0x8000)
-		m_pCamera->Pitch(1.f * timeDelta);
-	if (::GetAsyncKeyState(VK_DOWN) & 0x8000)
-		m_pCamera->Pitch(-1.f * timeDelta);
-	// Yaw
-	if (::GetAsyncKeyState(VK_LEFT) & 0x8000)
-		m_pCamera->Yaw(-1.f * timeDelta);
-	if (::GetAsyncKeyState(VK_RIGHT) & 0x8000)
-		m_pCamera->Yaw(1.f * timeDelta);
-	// Roll
-	if (::GetAsyncKeyState('N') & 0x8000)
-		m_pCamera->Roll(1.f * timeDelta);
-	if (::GetAsyncKeyState('M') & 0x8000)
-		m_pCamera->Roll(-1.f * timeDelta);
+	POINT lp;
+	GetCursorPos(&lp);
+	ScreenToClient(g_hWnd, &lp);
+
+	Ray ray = CalcPickingRay(lp.x, lp.y);
+	D3DXMATRIX view;
+	Device->GetTransform(D3DTS_VIEW, &view);
+	D3DXMATRIX viewInverse;
+	D3DXMatrixInverse(&viewInverse, 0, &view);
+
+	TransformRay(&ray, &viewInverse);
+
+	// 힛 테스트
+	if (::GetAsyncKeyState(VK_LBUTTON) && RaySphereIntTest(&ray, m_pBSphere))
+		::MessageBox(0, L"HIT!", L"HIT!", 0); 
+}
+
+Ray CMainApp::CalcPickingRay(int x, int y) // s_x, s_y
+{
+	// 투영창 좌표
+	float px = 0.f;
+	float py = 0.f;
+
+	D3DVIEWPORT9 vp;
+	Device->GetViewport(&vp);
+
+	D3DXMATRIX proj;
+	Device->GetTransform(D3DTS_PROJECTION, &proj);
+
+	// s_x, s_y를 구할 때, 뷰포트 변환을 진행하는데, s_x, s_y와 뷰포트 변환 행렬은 아니깐 역으로 뷰 스페이스 p_x, p_y를 구함
+	// proj으로 나눠주는 이유는, NDC가 될 때 배율이 적용되기 때문에 그걸 돌려주는 것임
+	px = (((2.f * x) / vp.Width) - 1.f) / proj(0, 0);
+	py = (((-2.f * y) / vp.Height) + 1.f) / proj(1, 1);
+
+	Ray ray;
+	ray._origin = D3DXVECTOR3(0.f, 0.f, 0.f);
+	ray._direction = D3DXVECTOR3(px, py, 1.f);
+	return ray;
+}
+
+void CMainApp::TransformRay(Ray* ray, D3DXMATRIX* T)
+{
+	// 뷰 스페이스를 월드 스페이스로 변환하기 위한 함수
+
+	D3DXVec3TransformCoord(
+		&ray->_origin,
+		&ray->_origin,
+		T
+	);
+	D3DXVec3TransformNormal(
+		&ray->_direction,
+		&ray->_direction,
+		T
+	);
+	D3DXVec3Normalize(&ray->_direction, &ray->_direction);
+}
+
+// 실제 Ray가 경계 볼륨에 충돌한지
+// - 즉, 클릭이 물체와 충돌했는지 확인
+bool CMainApp::RaySphereIntTest(Ray* ray, CBoundingVolume* sphere)
+{
+	D3DXVECTOR3 v = ray->_origin - sphere->GetCenter();
+
+	float b = 2.f * D3DXVec3Dot(&ray->_direction, &v);
+	float c = D3DXVec3Dot(&v, &v) - (sphere->GetRadius() * sphere->GetRadius());
+
+	float discriminant = (b * b) - (4.f * c);
+	if (discriminant < 0.f)
+		return false;
+
+	float s0 = (-b + discriminant) / 2.f;
+	float s1 = (-b - discriminant) / 2.f;
+
+	if (s0 >= 0.f || s1 >= 0.f)
+		return true;
+
+	return false;
 }

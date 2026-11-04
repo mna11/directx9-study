@@ -1,6 +1,8 @@
 ﻿#include "pch.h"
 #include "d3dUtility.h"
 
+HWND g_hWnd = nullptr;
+
 bool d3d::InitD3D(HINSTANCE hInstance, int width, int height, bool windowed,
 	D3DDEVTYPE deviceType, IDirect3DDevice9** device)
 {
@@ -26,7 +28,7 @@ bool d3d::InitD3D(HINSTANCE hInstance, int width, int height, bool windowed,
 		0, 0, width, height, NULL, (HMENU)NULL, hInstance, NULL);
 	::ShowWindow(hWnd, SW_SHOW);
 	::UpdateWindow(hWnd);
-
+	g_hWnd = hWnd;
 	/*================================================
 		D3D 시작
 	  ================================================*/

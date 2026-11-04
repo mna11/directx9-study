@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-class CCamera;
+class CBoundingVolume;
 
 class CMainApp
 {
@@ -15,7 +15,13 @@ public:
 private:
 	bool DrawBasicScene(bool bClear, float fScale);	
 	void KeyInput(float timeDelta);
+	Ray  CalcPickingRay(int x, int y);
+	void TransformRay(Ray* ray, D3DXMATRIX* T);
+	bool RaySphereIntTest(Ray* ray, CBoundingVolume* sphere);
 private:
-	CCamera* m_pCamera{nullptr};
+	D3DXMATRIX m_matWorld;
+	CBoundingVolume* m_pBSphere;
+
+	ID3DXMesh* m_pTeapot;
 };
 

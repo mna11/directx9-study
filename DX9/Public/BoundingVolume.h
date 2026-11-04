@@ -9,6 +9,11 @@ public:
 	~CBoundingVolume();
 
 public:
+	D3DXVECTOR3		GetCenter() { return m_vCenter; }
+	float			GetRadius() { return m_fRadius; }
+	
+	void			SetCenter(D3DXVECTOR3 v) { m_vCenter = v; }
+
 	void SetBoundType(BOUND_TYPE eType) { m_eType = eType; }
 	bool isPointInside(D3DXVECTOR3& p);
 	bool ComputeBoundingSphere(ID3DXMesh* mesh);

@@ -130,11 +130,11 @@ void CBoundingVolume::Render()
 	switch (m_eType)
 	{
 	case BOX:
-		if (!m_BoxMesh)
+		if (m_BoxMesh)
 			m_BoxMesh->DrawSubset(0);
 		break;
 	case SPHERE:
-		if (!m_SphereMesh)
+		if (m_SphereMesh)
 			m_SphereMesh->DrawSubset(0);
 		break;
 	}
