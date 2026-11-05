@@ -15,7 +15,6 @@ bool CMainApp::Setup() // Initialize의 역할
 
 	ID3DXBuffer* shader = { nullptr };
 	ID3DXBuffer* errorBuffer = { nullptr };
-
 	hr = D3DXCompileShaderFromFile(
 		L"./Bin/Resource/Shader/VertexShader.hlsl",
 		0,
@@ -25,7 +24,7 @@ bool CMainApp::Setup() // Initialize의 역할
 		D3DXSHADER_DEBUG,
 		&shader,
 		&errorBuffer,
-		&m_pTransformConstantTable
+		&m_pDiffuseConstTable
 	);
 
 	if (errorBuffer)
@@ -42,7 +41,7 @@ bool CMainApp::Setup() // Initialize의 역할
 
 	hr = Device->CreateVertexShader(
 		(DWORD*)shader->GetBufferPointer(),
-		&m_pTransformShader
+		&m_pDiffuseShader
 	);
 
 	if (FAILED(hr))
@@ -54,10 +53,37 @@ bool CMainApp::Setup() // Initialize의 역할
 	d3d::Release<ID3DXBuffer*>(shader);
 
 	// 쉐이더 상수 테이블 데이터 핸들 얻기
-	m_hTransformViewProj = m_pTransformConstantTable->GetConstantByName(0, "ViewProjMatrix");
+	m_hViewMatrix = m_pDiffuseConstTable->GetConstantByName(0, "ViewMatrix");
+	m_hViewProjMatrix = m_pDiffuseConstTable->GetConstantByName(0, "ViewProjMatrix");
+	m_hAmbientMtrl = m_pDiffuseConstTable->GetConstantByName(0, "AmbientMtrl");
+	m_hDiffuseMtrl = m_pDiffuseConstTable->GetConstantByName(0, "DiffuseMtrl");
+	m_hLightDir = m_pDiffuseConstTable->GetConstantByName(0, "LightDirection");
+	
+	// 쉐이더 상수 설정
+	// 빛 방향
+	D3DXVECTOR4 directionToLight(-0.57f, 0.57f, -0.57f, 0.f);
+	m_pDiffuseConstTable->SetVector(
+		Device,
+		m_hLightDir,
+		&directionToLight
+	);
+	// 마테리얼
+	D3DXVECTOR4 ambientMtrl(0.f, 0.f, 1.f, 1.f);
+	D3DXVECTOR4 diffuseMtrl(0.f, 0.f, 1.f, 1.f);
+	m_pDiffuseConstTable->SetVector(
+		Device,
+		m_hAmbientMtrl,
+		&ambientMtrl
+	);
+	m_pDiffuseConstTable->SetVector(
+		Device,
+		m_hDiffuseMtrl,
+		&diffuseMtrl
+	);
 	// 상수 선언시 초기화 값으로 상수 값을 지정할 수 있게 해줌
-	m_pTransformConstantTable->SetDefaults(Device);
+	m_pDiffuseConstTable->SetDefaults(Device);
 
+	// 투영 매트릭스
 	D3DXMatrixPerspectiveFovLH(
 		&m_matProj,
 		D3DX_PI * 0.25f,
@@ -66,17 +92,14 @@ bool CMainApp::Setup() // Initialize의 역할
 		1000.f
 	);
 
-	// 와이어 프레임으로 보기
-	Device->SetRenderState(D3DRS_FILLMODE, D3DFILL_WIREFRAME);
-
 	return true;
 }
 
 void CMainApp::Cleanup() // Release의 역할
 {
 	d3d::Release<ID3DXMesh*>(m_pTeapot);
-	d3d::Release<IDirect3DVertexShader9*>(m_pTransformShader);
-	d3d::Release<ID3DXConstantTable*>(m_pTransformConstantTable);
+	d3d::Release<IDirect3DVertexShader9*>(m_pDiffuseShader);
+	d3d::Release<ID3DXConstantTable*>(m_pDiffuseConstTable);
 }
 
 void CMainApp::Update(float timeDelta)
@@ -94,17 +117,21 @@ void CMainApp::Update(float timeDelta)
 		height -= 5.f * (timeDelta);
 
 	// 뷰 매트릭스
-	D3DXVECTOR3 position(cosf(angle) * 10.f, height, sinf(angle) * 10.f);
+	D3DXVECTOR3 position(cosf(angle) * 7.f, height, sinf(angle) * 7.f);
 	D3DXVECTOR3 target(0.f, 0.f, 0.f);
 	D3DXVECTOR3 up(0.f, 1.f, 0.f);
 	D3DXMATRIX V;
 	D3DXMatrixLookAtLH(&V, &position, &target, &up);
-	D3DXMATRIX ViewProj = V * m_matProj;
-
-	// 테이블에 핸들로 접근해서 연결하기
-	m_pTransformConstantTable->SetMatrix(
+	m_pDiffuseConstTable->SetMatrix(
 		Device,
-		m_hTransformViewProj,
+		m_hViewMatrix,
+		&V
+	);
+
+	D3DXMATRIX ViewProj = V * m_matProj;
+	m_pDiffuseConstTable->SetMatrix(
+		Device,
+		m_hViewProjMatrix,
 		&ViewProj
 	);
 }
@@ -120,7 +147,7 @@ bool CMainApp::Display() // Render의 역할
 		Device->Clear(0, 0, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, 0x0000000, 1.f, 0);
 		Device->BeginScene();
 
-		Device->SetVertexShader(m_pTransformShader);
+		Device->SetVertexShader(m_pDiffuseShader);
 		m_pTeapot->DrawSubset(0);
 
 		Device->EndScene();
