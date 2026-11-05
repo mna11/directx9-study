@@ -19,6 +19,9 @@
     <Filter Include="97. Shader">
       <UniqueIdentifier>{27cc7015-f475-41ea-8e24-b8066faa9286}</UniqueIdentifier>
     </Filter>
+    <Filter Include="03. SilhouetteEdge">
+      <UniqueIdentifier>{e70421f6-ffb5-4e34-b653-2c494553ae67}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="d3dUtility.h">
@@ -51,6 +54,9 @@
     <ClInclude Include="Public\BoundingVolume.h">
       <Filter>01. BoundingVolume</Filter>
     </ClInclude>
+    <ClInclude Include="public\SilhouetteEdge.h">
+      <Filter>03. SilhouetteEdge</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="d3dUtility.cpp">
@@ -71,6 +77,9 @@
     <ClCompile Include="Private\BoundingVolume.cpp">
       <Filter>01. BoundingVolume</Filter>
     </ClCompile>
+    <ClCompile Include="private\SilhouetteEdge.cpp">
+      <Filter>03. SilhouetteEdge</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Image Include="DX9.ico">
@@ -86,7 +95,10 @@
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="Bin\Resource\Shader\VertexShader.hlsl">
+    <FxCompile Include="Bin\Resource\Shader\toon.hlsl">
+      <Filter>97. Shader</Filter>
+    </FxCompile>
+    <FxCompile Include="Bin\Resource\Shader\outline.hlsl">
       <Filter>97. Shader</Filter>
     </FxCompile>
   </ItemGroup>

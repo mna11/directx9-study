@@ -1,5 +1,6 @@
 ﻿#include "pch.h"
 #include "BoundingVolume.h"
+#include "SilhouetteEdge.h"
 
 CBoundingVolume::~CBoundingVolume()
 {

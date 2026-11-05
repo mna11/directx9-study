@@ -2,6 +2,7 @@
 #include "MainApp.h"
 
 #include "Camera.h"
+#include "SilhouetteEdge.h"
 
 CMainApp::~CMainApp()
 {
@@ -11,26 +12,51 @@ CMainApp::~CMainApp()
 bool CMainApp::Setup() // Initialize의 역할
 {
 	HRESULT hr = { 0 };
-	D3DXCreateTeapot(Device, &m_pTeapot, 0);
+	ID3DXBuffer* adjBuffer[4] = { nullptr, nullptr, nullptr, nullptr };
 
-	ID3DXBuffer* shader = { nullptr };
-	ID3DXBuffer* errorBuffer = { nullptr };
+	D3DXCreateTeapot(Device, &m_pMeshes[0], &adjBuffer[0]);
+	D3DXCreateSphere(Device, 1.f, 20, 20, &m_pMeshes[1], &adjBuffer[1]);
+	D3DXCreateTorus(Device, 0.5f, 1.f, 20, 20, &m_pMeshes[2], &adjBuffer[2]);
+	D3DXCreateCylinder(Device, 0.5f, 0.5f, 2.f, 20, 20, &m_pMeshes[3], &adjBuffer[3]);
+
+	D3DXMatrixTranslation(&m_matWorld[0], 0.f, 2.f, 0.f);
+	D3DXMatrixTranslation(&m_matWorld[1], 0.f, -2.f, 0.f);
+	D3DXMatrixTranslation(&m_matWorld[2], -3.f, 0.f, 0.f);
+	D3DXMatrixTranslation(&m_matWorld[3], 3.f, 0.f, 0.f);
+
+	m_vMeshColor[0] = D3DXVECTOR4(1.f, 0.f, 0.f, 1.f);
+	m_vMeshColor[1] = D3DXVECTOR4(0.f, 1.f, 0.f, 1.f);
+	m_vMeshColor[2] = D3DXVECTOR4(0.f, 0.f, 1.f, 1.f);
+	m_vMeshColor[3] = D3DXVECTOR4(1.f, 1.f, 0.f, 1.f);
+
+	for (int i = 0; i < 4; ++i)
+		m_pMeshOutline[i] = new CSilhouetteEdge(m_pMeshes[i], adjBuffer[i]);
+
+	d3d::Release<ID3DXBuffer*>(adjBuffer[0]);
+	d3d::Release<ID3DXBuffer*>(adjBuffer[1]);
+	d3d::Release<ID3DXBuffer*>(adjBuffer[2]);
+	d3d::Release<ID3DXBuffer*>(adjBuffer[3]);
+
+	// 셰이더 컴파일
+	ID3DXBuffer* toonCompiledCode = { nullptr };
+	ID3DXBuffer* toonErrorBuffer = { nullptr };
+
 	hr = D3DXCompileShaderFromFile(
-		L"./Bin/Resource/Shader/VertexShader.hlsl",
+		L"./Bin/Resource/Shader/toon.hlsl",
 		0,
 		0,
 		"main",
 		"vs_1_1",
 		D3DXSHADER_DEBUG,
-		&shader,
-		&errorBuffer,
-		&m_pDiffuseConstTable
+		&toonCompiledCode,
+		&toonErrorBuffer,
+		&m_pToonConstTable
 	);
 
-	if (errorBuffer)
+	if (toonErrorBuffer)
 	{
-		::MessageBox(0, (wchar_t*)errorBuffer->GetBufferPointer(), 0, 0);
-		d3d::Release<ID3DXBuffer*>(errorBuffer);
+		::MessageBoxA(0, (char*)toonErrorBuffer->GetBufferPointer(), 0, 0);
+		d3d::Release<ID3DXBuffer*>(toonErrorBuffer);
 	}
 
 	if (FAILED(hr))
@@ -40,8 +66,8 @@ bool CMainApp::Setup() // Initialize의 역할
 	}
 
 	hr = Device->CreateVertexShader(
-		(DWORD*)shader->GetBufferPointer(),
-		&m_pDiffuseShader
+		(DWORD*)toonCompiledCode->GetBufferPointer(),
+		&m_pToonShader
 	);
 
 	if (FAILED(hr))
@@ -50,46 +76,83 @@ bool CMainApp::Setup() // Initialize의 역할
 		return false;
 	}
 
-	d3d::Release<ID3DXBuffer*>(shader);
+	d3d::Release<ID3DXBuffer*>(toonCompiledCode);
 
-	// 쉐이더 상수 테이블 데이터 핸들 얻기
-	m_hViewMatrix = m_pDiffuseConstTable->GetConstantByName(0, "ViewMatrix");
-	m_hViewProjMatrix = m_pDiffuseConstTable->GetConstantByName(0, "ViewProjMatrix");
-	m_hAmbientMtrl = m_pDiffuseConstTable->GetConstantByName(0, "AmbientMtrl");
-	m_hDiffuseMtrl = m_pDiffuseConstTable->GetConstantByName(0, "DiffuseMtrl");
-	m_hLightDir = m_pDiffuseConstTable->GetConstantByName(0, "LightDirection");
-	
-	// 쉐이더 상수 설정
-	// 빛 방향
+	// Outline Shader
+
+	ID3DXBuffer* outlineCompiledCode = { nullptr };
+	ID3DXBuffer* outlineErrorBuffer = { nullptr };
+
+	hr = D3DXCompileShaderFromFile(
+		L"./Bin/Resource/Shader/outline.hlsl",
+		0,
+		0,
+		"main",
+		"vs_1_1",
+		D3DXSHADER_DEBUG,
+		&outlineCompiledCode,
+		&outlineErrorBuffer,
+		&m_pOutlineConstTable
+	);
+
+	if (outlineErrorBuffer)
+	{
+		::MessageBoxA(0, (char*)outlineErrorBuffer->GetBufferPointer(), 0, 0);
+		d3d::Release<ID3DXBuffer*>(outlineErrorBuffer);
+	}
+
+	if (FAILED(hr))
+	{
+		::MessageBox(0, L"D3DXCompileShaderFromFile() - FAILED", 0, 0);
+		return false;
+	}
+
+	hr = Device->CreateVertexShader(
+		(DWORD*)outlineCompiledCode->GetBufferPointer(),
+		&m_pOutlineShader);
+
+	if (FAILED(hr))
+	{
+		::MessageBox(0, L"CreateVertexShader - FAILED", 0, 0);
+		return false;
+	}
+
+	d3d::Release<ID3DXBuffer*>(outlineCompiledCode);
+
+
+	// 텍스처 로드
+	D3DXCreateTextureFromFile(Device, L"./Bin/Resource/toonshade.bmp", &m_pShadeTex);
+
+	Device->SetSamplerState(0, D3DSAMP_MAGFILTER, D3DTEXF_POINT);
+	Device->SetSamplerState(0, D3DSAMP_MINFILTER, D3DTEXF_POINT);
+	Device->SetSamplerState(0, D3DSAMP_MIPFILTER, D3DTEXF_NONE);
+
+	// 핸들
+
+	m_hToonWorldView = m_pToonConstTable->GetConstantByName(0, "WorldViewMatrix");
+	m_hToonWorldViewProj = m_pToonConstTable->GetConstantByName(0, "WorldViewProjMatrix");
+	m_hToonColor = m_pToonConstTable->GetConstantByName(0, "Color");
+	m_hToonLightDir = m_pToonConstTable->GetConstantByName(0, "LightDirection");
+
+	m_hOutlineWorldView = m_pOutlineConstTable->GetConstantByName(0, "WorldViewMatrix");
+	m_hOutlineProjHandle = m_pOutlineConstTable->GetConstantByName(0, "ProjMatrix");
+
+	// Shader Constants 세팅
 	D3DXVECTOR4 directionToLight(-0.57f, 0.57f, -0.57f, 0.f);
-	m_pDiffuseConstTable->SetVector(
+
+	m_pToonConstTable->SetVector(
 		Device,
-		m_hLightDir,
+		m_hToonLightDir,
 		&directionToLight
 	);
-	// 마테리얼
-	D3DXVECTOR4 ambientMtrl(0.f, 0.f, 1.f, 1.f);
-	D3DXVECTOR4 diffuseMtrl(0.f, 0.f, 1.f, 1.f);
-	m_pDiffuseConstTable->SetVector(
-		Device,
-		m_hAmbientMtrl,
-		&ambientMtrl
-	);
-	m_pDiffuseConstTable->SetVector(
-		Device,
-		m_hDiffuseMtrl,
-		&diffuseMtrl
-	);
-	// 상수 선언시 초기화 값으로 상수 값을 지정할 수 있게 해줌
-	m_pDiffuseConstTable->SetDefaults(Device);
 
-	// 투영 매트릭스
+	m_pToonConstTable->SetDefaults(Device);
+	m_pOutlineConstTable->SetDefaults(Device);
+
+	// 투영 행렬
 	D3DXMatrixPerspectiveFovLH(
-		&m_matProj,
-		D3DX_PI * 0.25f,
-		(float)g_iWinSizeX / (float)g_iWinSizeY,
-		1.f,
-		1000.f
+		&m_matProj, D3DX_PI * 0.25f,
+		(float)g_iWinSizeX / (float)g_iWinSizeY, 1.f, 1000.f
 	);
 
 	return true;
@@ -97,9 +160,16 @@ bool CMainApp::Setup() // Initialize의 역할
 
 void CMainApp::Cleanup() // Release의 역할
 {
-	d3d::Release<ID3DXMesh*>(m_pTeapot);
-	d3d::Release<IDirect3DVertexShader9*>(m_pDiffuseShader);
-	d3d::Release<ID3DXConstantTable*>(m_pDiffuseConstTable);
+	for (int i = 0; i < 4; i++)
+	{
+		d3d::Release<ID3DXMesh*>(m_pMeshes[i]);
+		d3d::Delete<CSilhouetteEdge*>(m_pMeshOutline[i]);
+	}
+	d3d::Release<IDirect3DTexture9*>(m_pShadeTex);
+	d3d::Release<IDirect3DVertexShader9*>(m_pToonShader);
+	d3d::Release<ID3DXConstantTable*>(m_pToonConstTable);
+	d3d::Release<IDirect3DVertexShader9*>(m_pOutlineShader);
+	d3d::Release<ID3DXConstantTable*>(m_pOutlineConstTable);
 }
 
 void CMainApp::Update(float timeDelta)
@@ -120,20 +190,8 @@ void CMainApp::Update(float timeDelta)
 	D3DXVECTOR3 position(cosf(angle) * 7.f, height, sinf(angle) * 7.f);
 	D3DXVECTOR3 target(0.f, 0.f, 0.f);
 	D3DXVECTOR3 up(0.f, 1.f, 0.f);
-	D3DXMATRIX V;
-	D3DXMatrixLookAtLH(&V, &position, &target, &up);
-	m_pDiffuseConstTable->SetMatrix(
-		Device,
-		m_hViewMatrix,
-		&V
-	);
+	D3DXMatrixLookAtLH(&m_matView, &position, &target, &up);
 
-	D3DXMATRIX ViewProj = V * m_matProj;
-	m_pDiffuseConstTable->SetMatrix(
-		Device,
-		m_hViewProjMatrix,
-		&ViewProj
-	);
 }
 
 bool CMainApp::Display() // Render의 역할
@@ -144,11 +202,66 @@ bool CMainApp::Display() // Render의 역할
 		// 전체 화면을 지우겠다 (0, 0)
 		// Target Surface와 깊이 버퍼를 지우겠다.
 		// 검정색, z 값은 1로 (가장 멀게), 스텐실은 0으로
-		Device->Clear(0, 0, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, 0x0000000, 1.f, 0);
+		Device->Clear(0, 0, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, 0xffffffff, 1.f, 0);
 		Device->BeginScene();
 
-		Device->SetVertexShader(m_pDiffuseShader);
-		m_pTeapot->DrawSubset(0);
+		// 카툰 그리기
+		Device->SetVertexShader(m_pToonShader);
+		Device->SetTexture(0, m_pShadeTex);
+		
+		D3DXMATRIX worldView;
+		D3DXMATRIX worldViewProj;
+		for (int i = 0; i < 4; ++i)
+		{
+			worldView = m_matWorld[i] * m_matView;
+			worldViewProj = m_matWorld[i] * m_matView * m_matProj;
+
+			m_pToonConstTable->SetMatrix(
+				Device,
+				m_hToonWorldView,
+				&worldView
+			);
+
+			m_pToonConstTable->SetMatrix(
+				Device,
+				m_hToonWorldViewProj,
+				&worldViewProj
+			); 
+
+			m_pToonConstTable->SetVector(
+				Device,
+				m_hToonColor,
+				&m_vMeshColor[i]
+			);
+
+			m_pMeshes[i]->DrawSubset(0);
+		}
+
+		// 외곽선 그리기
+		Device->SetVertexShader(m_pOutlineShader);
+		Device->SetTexture(0, 0);
+		Device->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE); // -> 외곽선 사각형이 펼쳐지면서 CW, CCW 구분이 힘들어져서
+															  //    이때 필요한 외곽선이 컬링으로 지워지면 안되니깐 다 그림
+
+		for (int i = 0; i < 4; ++i)
+		{
+			worldView = m_matWorld[i] * m_matView;
+
+			m_pOutlineConstTable->SetMatrix(
+				Device,
+				m_hOutlineWorldView,
+				&worldView
+			);
+
+			m_pOutlineConstTable->SetMatrix(
+				Device,
+				m_hOutlineProjHandle,
+				&m_matProj
+			);
+			
+			m_pMeshOutline[i]->Render();
+		}
+		Device->SetRenderState(D3DRS_CULLMODE, D3DCULL_CCW); // 다시 돌리기
 
 		Device->EndScene();
 		Device->Present(0, 0, 0, 0); // 후면 버퍼 시연
