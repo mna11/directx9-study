@@ -14,8 +14,12 @@ public:
 	bool Display();
 private:
 	bool DrawBasicScene(bool bClear, float fScale);	
-	void KeyInput(float timeDelta);
 private:
-	CCamera* m_pCamera{nullptr};
+	IDirect3DVertexShader9* m_pTransformShader = {};
+	ID3DXConstantTable* m_pTransformConstantTable = {};
+
+	ID3DXMesh* m_pTeapot = {};
+	D3DXHANDLE m_hTransformViewProj = {};
+	D3DXMATRIX m_matProj = {};
 };
 

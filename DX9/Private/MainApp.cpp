@@ -10,37 +10,103 @@ CMainApp::~CMainApp()
 
 bool CMainApp::Setup() // Initialize의 역할
 {
-	m_pCamera = new CCamera;
+	HRESULT hr = { 0 };
+	D3DXCreateTeapot(Device, &m_pTeapot, 0);
 
-	DrawBasicScene(false, 0.f); // 기본 씬 초기화
+	ID3DXBuffer* shader = { nullptr };
+	ID3DXBuffer* errorBuffer = { nullptr };
 
-	D3DXMATRIX proj;
+	hr = D3DXCompileShaderFromFile(
+		L"./Bin/Resource/Shader/VertexShader.hlsl",
+		0,
+		0,
+		"main",
+		"vs_1_1",
+		D3DXSHADER_DEBUG,
+		&shader,
+		&errorBuffer,
+		&m_pTransformConstantTable
+	);
+
+	if (errorBuffer)
+	{
+		::MessageBox(0, (wchar_t*)errorBuffer->GetBufferPointer(), 0, 0);
+		d3d::Release<ID3DXBuffer*>(errorBuffer);
+	}
+
+	if (FAILED(hr))
+	{
+		::MessageBox(0, L"D3DXCompileShaderFromFile() - FAILED", 0, 0);
+		return false;
+	}
+
+	hr = Device->CreateVertexShader(
+		(DWORD*)shader->GetBufferPointer(),
+		&m_pTransformShader
+	);
+
+	if (FAILED(hr))
+	{
+		::MessageBox(0, L"CreateVertexShader() - FAILED", 0, 0);
+		return false;
+	}
+
+	d3d::Release<ID3DXBuffer*>(shader);
+
+	// 쉐이더 상수 테이블 데이터 핸들 얻기
+	m_hTransformViewProj = m_pTransformConstantTable->GetConstantByName(0, "ViewProjMatrix");
+	// 상수 선언시 초기화 값으로 상수 값을 지정할 수 있게 해줌
+	m_pTransformConstantTable->SetDefaults(Device);
+
 	D3DXMatrixPerspectiveFovLH(
-		&proj,
+		&m_matProj,
 		D3DX_PI * 0.25f,
 		(float)g_iWinSizeX / (float)g_iWinSizeY,
 		1.f,
 		1000.f
 	);
-	Device->SetTransform(D3DTS_PROJECTION, &proj);
+
+	// 와이어 프레임으로 보기
+	Device->SetRenderState(D3DRS_FILLMODE, D3DFILL_WIREFRAME);
 
 	return true;
 }
 
 void CMainApp::Cleanup() // Release의 역할
 {
-	DrawBasicScene(true, 0.f);
-	delete m_pCamera;
+	d3d::Release<ID3DXMesh*>(m_pTeapot);
+	d3d::Release<IDirect3DVertexShader9*>(m_pTransformShader);
+	d3d::Release<ID3DXConstantTable*>(m_pTransformConstantTable);
 }
 
 void CMainApp::Update(float timeDelta)
 {
-	KeyInput(timeDelta);
+	static float angle = (3.f * D3DX_PI) / 2.f;
+	static float height = 5.f;
 
-	// 뷰 행렬
+	if (::GetAsyncKeyState(VK_LEFT) & 0x8000)
+		angle -= 0.5f * timeDelta;
+	if (::GetAsyncKeyState(VK_RIGHT) & 0x8000)
+		angle += 0.5f * timeDelta;
+	if (::GetAsyncKeyState(VK_UP) & 0x8000)
+		height += 5.f * timeDelta;
+	if (::GetAsyncKeyState(VK_DOWN) & 0x8000)
+		height -= 5.f * (timeDelta);
+
+	// 뷰 매트릭스
+	D3DXVECTOR3 position(cosf(angle) * 10.f, height, sinf(angle) * 10.f);
+	D3DXVECTOR3 target(0.f, 0.f, 0.f);
+	D3DXVECTOR3 up(0.f, 1.f, 0.f);
 	D3DXMATRIX V;
-	m_pCamera->GetViewMatrix(&V);
-	Device->SetTransform(D3DTS_VIEW, &V);
+	D3DXMatrixLookAtLH(&V, &position, &target, &up);
+	D3DXMATRIX ViewProj = V * m_matProj;
+
+	// 테이블에 핸들로 접근해서 연결하기
+	m_pTransformConstantTable->SetMatrix(
+		Device,
+		m_hTransformViewProj,
+		&ViewProj
+	);
 }
 
 bool CMainApp::Display() // Render의 역할
@@ -54,7 +120,8 @@ bool CMainApp::Display() // Render의 역할
 		Device->Clear(0, 0, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, 0x0000000, 1.f, 0);
 		Device->BeginScene();
 
-		DrawBasicScene(false, 1.f);
+		Device->SetVertexShader(m_pTransformShader);
+		m_pTeapot->DrawSubset(0);
 
 		Device->EndScene();
 		Device->Present(0, 0, 0, 0); // 후면 버퍼 시연
@@ -155,38 +222,4 @@ bool CMainApp::DrawBasicScene(bool bClear, float fScale)
 		}
 	}
 	return true;
-}
-
-void CMainApp::KeyInput(float timeDelta)
-{
-	// 앞 뒤 이동
-	if (::GetAsyncKeyState('W') & 0x8000)
-		m_pCamera->Walk(4.f * timeDelta);
-	if (::GetAsyncKeyState('S') & 0x8000)
-		m_pCamera->Walk(-4.f * timeDelta);
-	// 좌 우 이동
-	if (::GetAsyncKeyState('A') & 0x8000)
-		m_pCamera->Strafe(-4.f * timeDelta);
-	if (::GetAsyncKeyState('D') & 0x8000)
-		m_pCamera->Strafe(4.f * timeDelta);
-	// 상 하 이동
-	if (::GetAsyncKeyState('R') & 0x8000)
-		m_pCamera->Fly(4.f * timeDelta);
-	if (::GetAsyncKeyState('F') & 0x8000)
-		m_pCamera->Fly(-4.f * timeDelta);
-	// Pitch
-	if (::GetAsyncKeyState(VK_UP) & 0x8000)
-		m_pCamera->Pitch(1.f * timeDelta);
-	if (::GetAsyncKeyState(VK_DOWN) & 0x8000)
-		m_pCamera->Pitch(-1.f * timeDelta);
-	// Yaw
-	if (::GetAsyncKeyState(VK_LEFT) & 0x8000)
-		m_pCamera->Yaw(-1.f * timeDelta);
-	if (::GetAsyncKeyState(VK_RIGHT) & 0x8000)
-		m_pCamera->Yaw(1.f * timeDelta);
-	// Roll
-	if (::GetAsyncKeyState('N') & 0x8000)
-		m_pCamera->Roll(1.f * timeDelta);
-	if (::GetAsyncKeyState('M') & 0x8000)
-		m_pCamera->Roll(-1.f * timeDelta);
 }
