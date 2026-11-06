@@ -29,6 +29,28 @@ namespace Client
 		static const DWORD FVF;
 	};
 	const DWORD ColorVertex::FVF = D3DFVF_XYZ | D3DFVF_DIFFUSE;
+
+	struct MultiTexVertex
+	{
+		MultiTexVertex(float x, float y, float z,
+			float u0, float v0,
+			float u1, float v1,
+			float u2, float v2)
+		{
+			_x = x; _y = y; _z = z;
+			_u0 = u0; _v0 = v0;
+			_u1 = u1; _v1 = v1;
+			_u2 = u2; _v2 = v2;
+		}
+
+		float _x, _y, _z;
+		float _u0, _v0;
+		float _u1, _v1;
+		float _u2, _v2;
+
+		static const DWORD FVF;
+	};
+	const DWORD MultiTexVertex::FVF = D3DFVF_XYZ | D3DFVF_TEX3;
 }
 
 using namespace Client;
