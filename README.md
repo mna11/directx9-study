@@ -1,7 +1,7 @@
 # DirectX 9 Study
 <img width="500" height="625" alt="Image" src="https://github.com/user-attachments/assets/c2cd6076-1282-41b6-bd57-55c62f2c3f29" />
 
-프랭크 루나의 《DirectX 9를 이용한 3D GAME 프로그래밍 입문》(용책) 예제를 참고해 작성한 C++ 실습 코드입니다. 학습 과정에서 일부 구현을 수정했으며, 예제는 챕터별 브랜치로 정리했습니다.
+프랭크 루나의 《DirectX 9를 이용한 3D GAME 프로그래밍 입문》(용책) 예제를 따라 정리한 C++ 실습 코드입니다. 학습 과정에서 일부 구현을 수정했으며, 예제는 챕터별 브랜치로 정리했습니다.
 
 ## 챕터별 예제
 
