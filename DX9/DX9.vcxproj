@@ -149,6 +149,7 @@
     <ClInclude Include="Public\BoundingVolume.h" />
     <ClInclude Include="public\Camera.h" />
     <ClInclude Include="public\MainApp.h" />
+    <ClInclude Include="Public\Terrain.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="targetver.h" />
   </ItemGroup>
@@ -162,6 +163,7 @@
     <ClCompile Include="Private\BoundingVolume.cpp" />
     <ClCompile Include="private\Camera.cpp" />
     <ClCompile Include="private\MainApp.cpp" />
+    <ClCompile Include="Private\Terrain.cpp" />
     <ClCompile Include="WinMain.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -172,7 +174,7 @@
     <Image Include="small.ico" />
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="Bin\Resource\Effect\light_tex.fx">
+    <FxCompile Include="Bin\Resource\Effect\fog.fx">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </FxCompile>
   </ItemGroup>

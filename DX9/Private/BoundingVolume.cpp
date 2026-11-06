@@ -35,6 +35,7 @@ bool CBoundingVolume::isPointInside(D3DXVECTOR3& p)
 
 		break;
 	}
+	return false;
 }
 
 bool CBoundingVolume::ComputeBoundingSphere(ID3DXMesh* mesh)

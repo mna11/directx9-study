@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 class CCamera;
+class CTerrain;
 
 class CMainApp
 {
@@ -14,18 +15,12 @@ public:
 	bool Display();
 private:
 	bool DrawBasicScene(bool bClear, float fScale);
+	void KeyInput(float timeDelta);
 private:
-	ID3DXMesh* m_pMesh = {};
-	vector<D3DMATERIAL9> m_vecMtrl = {};
-	vector<IDirect3DTexture9*> m_pTex = {};
+	CTerrain* m_pTerrain = {};
+	CCamera* m_pCamera = {};
 
-	ID3DXEffect* m_pLightTexEffect = {};
-
-	D3DXHANDLE m_hWorldMatrix = {};
-	D3DXHANDLE m_hViewMatrix = {};
-	D3DXHANDLE m_hProjMatrix = {};
-	D3DXHANDLE m_hTex = {};
-	D3DXHANDLE m_hLightTexTech = {};
-
+	ID3DXEffect* m_pFogEffect = {};
+	D3DXHANDLE m_hFogTech = {};
 };
 
