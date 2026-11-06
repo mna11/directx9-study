@@ -2,7 +2,6 @@
 #include "MainApp.h"
 
 #include "Camera.h"
-#include "Terrain.h"
 
 CMainApp::~CMainApp()
 {
@@ -11,31 +10,37 @@ CMainApp::~CMainApp()
 
 bool CMainApp::Setup() // Initialize의 역할
 {
-	HRESULT hr = {};
+	HRESULT hr = { 0 };
+	ID3DXBuffer* adjBuffer[4] = { nullptr, nullptr, nullptr, nullptr };
 
-	D3DXVECTOR3 lightDirection(0.f, 1.f, 0.f);
-	m_pTerrain = new CTerrain(L"./Bin/Resource/coastMountain64.raw", 64, 64, 6, 0.5f);
-	m_pTerrain->GenTexture(&lightDirection);
+	D3DXCreateTeapot(Device, &m_pMeshes[0], &adjBuffer[0]);
+	D3DXCreateSphere(Device, 1.f, 20, 20, &m_pMeshes[1], &adjBuffer[1]);
+	D3DXCreateTorus(Device, 0.5f, 1.f, 20, 20, &m_pMeshes[2], &adjBuffer[2]);
+	D3DXCreateCylinder(Device, 0.5f, 0.5f, 2.f, 20, 20, &m_pMeshes[3], &adjBuffer[3]);
 
-	Device->SetSamplerState(0, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR);
-	Device->SetSamplerState(0, D3DSAMP_MINFILTER, D3DTEXF_LINEAR);
-	Device->SetSamplerState(0, D3DSAMP_MIPFILTER, D3DTEXF_LINEAR);
+	D3DXMatrixTranslation(&m_matWorld[0], 0.f, 2.f, 0.f);
+	D3DXMatrixTranslation(&m_matWorld[1], 0.f, -2.f, 0.f);
+	D3DXMatrixTranslation(&m_matWorld[2], -3.f, 0.f, 0.f);
+	D3DXMatrixTranslation(&m_matWorld[3], 3.f, 0.f, 0.f);
 
-	D3DXVECTOR3 pos{ 100.f, 100.f, -250.f };
-	m_pCamera = new CCamera;
-	m_pCamera->SetPosition(&pos);
+	m_vMeshColor[0] = D3DXVECTOR4(1.f, 0.f, 0.f, 1.f);
+	m_vMeshColor[1] = D3DXVECTOR4(0.f, 1.f, 0.f, 1.f);
+	m_vMeshColor[2] = D3DXVECTOR4(0.f, 0.f, 1.f, 1.f);
+	m_vMeshColor[3] = D3DXVECTOR4(1.f, 1.f, 0.f, 1.f);
 
+	// 이펙트
 	ID3DXBuffer* errorBuffer = {};
 	hr = D3DXCreateEffectFromFile(
 		Device,
-		L"./Bin/Resource/Effect/fog.fx",
-		0,
-		0,
+		L"./Bin/Resource/Effect/toon.fx",
+		0, 0,
 		D3DXSHADER_DEBUG,
 		0,
-		&m_pFogEffect,
+		&m_pToonEffect,
 		&errorBuffer
 	);
+
+
 	if (errorBuffer)
 	{
 		::MessageBoxA(0, (char*)errorBuffer->GetBufferPointer(), 0, 0);
@@ -44,39 +49,75 @@ bool CMainApp::Setup() // Initialize의 역할
 
 	if (FAILED(hr))
 	{
-		::MessageBox(0, L"D3DXCreateEffectFromFile() - FAILED", 0, 0);
+		::MessageBox(0, L"D3DXCompileShaderFromFile() - FAILED", 0, 0);
 		return false;
 	}
 
-	m_hFogTech = m_pFogEffect->GetTechniqueByName("Fog");
+	// 텍스처 로드
+	D3DXCreateTextureFromFile(Device, L"./Bin/Resource/toonshade.bmp", &m_pShadeTex);
 
-	D3DXMATRIX P;
-	D3DXMatrixPerspectiveFovLH(
-		&P,
-		D3DX_PI * 0.25f,
-		(float)g_iWinSizeX / (float)g_iWinSizeY,
-		1.f,
-		1000.f
+	Device->SetSamplerState(0, D3DSAMP_MAGFILTER, D3DTEXF_POINT);
+	Device->SetSamplerState(0, D3DSAMP_MINFILTER, D3DTEXF_POINT);
+	Device->SetSamplerState(0, D3DSAMP_MIPFILTER, D3DTEXF_NONE);
+
+	// 핸들
+	m_hToonTech = m_pToonEffect->GetTechniqueByName("Toon");
+	m_hShadeTex = m_pToonEffect->GetParameterByName(0, "ShadeTex");
+	m_hToonWorldView = m_pToonEffect->GetParameterByName(0, "WorldViewMatrix");
+	m_hToonWorldViewProj = m_pToonEffect->GetParameterByName(0, "WorldViewProjMatrix");
+	m_hToonColor = m_pToonEffect->GetParameterByName(0, "Color");
+	m_hToonLightDir = m_pToonEffect->GetParameterByName(0, "LightDirection");
+
+	D3DXVECTOR4 directionToLight(-0.57f, 0.57f, -0.57f, 0.f);
+	m_pToonEffect->SetVector(
+		m_hToonLightDir,
+		&directionToLight
 	);
-	Device->SetTransform(D3DTS_PROJECTION, &P);
+
+	// 투영 행렬
+	D3DXMatrixPerspectiveFovLH(
+		&m_matProj, D3DX_PI * 0.25f,
+		(float)g_iWinSizeX / (float)g_iWinSizeY, 1.f, 1000.f
+	);
+
+	// 텍스처
+	IDirect3DTexture9* tex = {};
+	D3DXCreateTextureFromFile(Device, L"./Bin/Resource/toonshade.bmp", &tex);
+	m_pToonEffect->SetTexture(m_hShadeTex, tex);
+	d3d::Release<IDirect3DTexture9*>(tex);
 
 	return true;
 }
 
 void CMainApp::Cleanup() // Release의 역할
 {
-	delete m_pTerrain;
-	m_pTerrain = nullptr;
-	d3d::Release<ID3DXEffect*>(m_pFogEffect);
+	for (int i = 0; i < 4; i++)
+	{
+		d3d::Release<ID3DXMesh*>(m_pMeshes[i]);
+	}
+	d3d::Release<IDirect3DTexture9*>(m_pShadeTex);
+	d3d::Release<ID3DXEffect*>(m_pToonEffect);
 }
 
 void CMainApp::Update(float timeDelta)
 {
-	KeyInput(timeDelta);
+	static float angle = (3.f * D3DX_PI) / 2.f;
+	static float height = 5.f;
 
-	D3DXMATRIX V;
-	m_pCamera->GetViewMatrix(&V);
-	Device->SetTransform(D3DTS_VIEW, &V);
+	if (::GetAsyncKeyState(VK_LEFT) & 0x8000)
+		angle -= 0.5f * timeDelta;
+	if (::GetAsyncKeyState(VK_RIGHT) & 0x8000)
+		angle += 0.5f * timeDelta;
+	if (::GetAsyncKeyState(VK_UP) & 0x8000)
+		height += 5.f * timeDelta;
+	if (::GetAsyncKeyState(VK_DOWN) & 0x8000)
+		height -= 5.f * (timeDelta);
+
+	// 뷰 매트릭스
+	D3DXVECTOR3 position(cosf(angle) * 10.f, height, sinf(angle) * 10.f);
+	D3DXVECTOR3 target(0.f, 0.f, 0.f);
+	D3DXVECTOR3 up(0.f, 1.f, 0.f);
+	D3DXMatrixLookAtLH(&m_matView, &position, &target, &up);
 }
 
 bool CMainApp::Display() // Render의 역할
@@ -87,26 +128,35 @@ bool CMainApp::Display() // Render의 역할
 		// 전체 화면을 지우겠다 (0, 0)
 		// Target Surface와 깊이 버퍼를 지우겠다.
 		// 검정색, z 값은 1로 (가장 멀게), 스텐실은 0으로
-		Device->Clear(0, 0, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, 0x0000000, 1.f, 0);
+		Device->Clear(0, 0, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, 0xffffffff, 1.f, 0);
 		Device->BeginScene();
-		// 테크 설정
-		m_pFogEffect->SetTechnique(m_hFogTech);
-
-		D3DXMATRIX I;
-		D3DXMatrixIdentity(&I);
+		
+		m_pToonEffect->SetTechnique(m_hToonTech);
 
 		UINT numPasses = {};
-		m_pFogEffect->Begin(&numPasses, 0);
-		for (UINT i = 0; i < numPasses; ++i)
+		m_pToonEffect->Begin(&numPasses, 0);
+
+		D3DXMATRIX WorldView;
+		D3DXMATRIX WorldViewProj;
+		for (int i = 0; i < numPasses; ++i)
 		{
-			m_pFogEffect->BeginPass(i);
+			m_pToonEffect->BeginPass(i);
 
-			if (m_pTerrain)
-				m_pTerrain->Render(&I, false);
+			for (int j = 0; j < 4; ++j)
+			{
+				WorldView = m_matWorld[j] * m_matView;
+				WorldViewProj = m_matWorld[j] * m_matView * m_matProj;
 
-			m_pFogEffect->EndPass();
+				m_pToonEffect->SetMatrix(m_hToonWorldView, &WorldView);
+				m_pToonEffect->SetMatrix(m_hToonWorldViewProj, &WorldViewProj);
+				m_pToonEffect->SetVector(m_hToonColor, &m_vMeshColor[j]);
+				m_pToonEffect->CommitChanges();
+				m_pMeshes[j]->DrawSubset(0);
+			}
+
 		}
-		m_pFogEffect->End();
+		m_pToonEffect->EndPass();
+		m_pToonEffect->End();
 
 		Device->EndScene();
 		Device->Present(0, 0, 0, 0); // 후면 버퍼 시연
@@ -116,10 +166,10 @@ bool CMainApp::Display() // Render의 역할
 
 bool CMainApp::DrawBasicScene(bool bClear, float fScale)
 {
-	static IDirect3DVertexBuffer9*	floor{ nullptr };
-	static IDirect3DTexture9*		tex{ nullptr };
-	static ID3DXMesh*				pillar{ nullptr };
-	
+	static IDirect3DVertexBuffer9* floor{ nullptr };
+	static IDirect3DTexture9* tex{ nullptr };
+	static ID3DXMesh* pillar{ nullptr };
+
 	HRESULT hr{ 0 };
 
 	if (bClear)
@@ -175,7 +225,7 @@ bool CMainApp::DrawBasicScene(bool bClear, float fScale)
 		Device->SetRenderState(D3DRS_SPECULARENABLE, true);
 
 		D3DXMATRIX T, R, P, S;
-		
+
 		D3DXMatrixScaling(&S, fScale, fScale, fScale);
 
 		D3DXMatrixRotationX(&R, -D3DX_PI * 0.5f);
@@ -192,7 +242,7 @@ bool CMainApp::DrawBasicScene(bool bClear, float fScale)
 
 		// 기둥 그리기
 		Device->SetMaterial(&d3d::BLUE_MTRL);
-		Device->SetTexture(0, 0); 
+		Device->SetTexture(0, 0);
 		for (int i = 0; i < 5; ++i)
 		{
 			D3DXMatrixTranslation(&T, -5.f, 0.f, -15.f + (i * 7.5f));
@@ -207,38 +257,4 @@ bool CMainApp::DrawBasicScene(bool bClear, float fScale)
 		}
 	}
 	return true;
-}
-
-void CMainApp::KeyInput(float timeDelta)
-{
-	// 앞 뒤 이동
-	if (::GetAsyncKeyState('W') & 0x8000)
-		m_pCamera->Walk(100.f * timeDelta);
-	if (::GetAsyncKeyState('S') & 0x8000)
-		m_pCamera->Walk(-100.f * timeDelta);
-	// 좌 우 이동
-	if (::GetAsyncKeyState('A') & 0x8000)
-		m_pCamera->Strafe(-100.f * timeDelta);
-	if (::GetAsyncKeyState('D') & 0x8000)
-		m_pCamera->Strafe(100.f * timeDelta);
-	// 상 하 이동
-	if (::GetAsyncKeyState('R') & 0x8000)
-		m_pCamera->Fly(4.f * timeDelta);
-	if (::GetAsyncKeyState('F') & 0x8000)
-		m_pCamera->Fly(-4.f * timeDelta);
-	// Pitch
-	if (::GetAsyncKeyState(VK_UP) & 0x8000)
-		m_pCamera->Pitch(1.f * timeDelta);
-	if (::GetAsyncKeyState(VK_DOWN) & 0x8000)
-		m_pCamera->Pitch(-1.f * timeDelta);
-	// Yaw
-	if (::GetAsyncKeyState(VK_LEFT) & 0x8000)
-		m_pCamera->Yaw(-1.f * timeDelta);
-	if (::GetAsyncKeyState(VK_RIGHT) & 0x8000)
-		m_pCamera->Yaw(1.f * timeDelta);
-	// Roll
-	if (::GetAsyncKeyState('N') & 0x8000)
-		m_pCamera->Roll(1.f * timeDelta);
-	if (::GetAsyncKeyState('M') & 0x8000)
-		m_pCamera->Roll(-1.f * timeDelta);
 }

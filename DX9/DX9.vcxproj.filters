@@ -10,6 +10,18 @@
     <Filter Include="99. Defines">
       <UniqueIdentifier>{831180a4-f275-4e48-84e4-d468b6d16fe5}</UniqueIdentifier>
     </Filter>
+    <Filter Include="01. BoundingVoulme">
+      <UniqueIdentifier>{e4508f5e-fc4a-443c-8542-9d64e34b520e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="02. Camera">
+      <UniqueIdentifier>{383d7382-1ecb-42a5-8b0f-30506deb6c3d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03. Terrain">
+      <UniqueIdentifier>{f59cbf12-1cf7-4eee-964e-93fdf7068efb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="04. Effect">
+      <UniqueIdentifier>{71beab7e-2ae7-4e4a-bd76-b42ea6540641}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="d3dUtility.h">
@@ -33,6 +45,18 @@
     <ClInclude Include="pch.h">
       <Filter>99. Defines</Filter>
     </ClInclude>
+    <ClInclude Include="Public\BoundingVolume.h">
+      <Filter>01. BoundingVoulme</Filter>
+    </ClInclude>
+    <ClInclude Include="public\Camera.h">
+      <Filter>02. Camera</Filter>
+    </ClInclude>
+    <ClInclude Include="Public\Terrain.h">
+      <Filter>03. Terrain</Filter>
+    </ClInclude>
+    <ClInclude Include="Defines.h">
+      <Filter>99. Defines</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="d3dUtility.cpp">
@@ -44,11 +68,17 @@
     <ClCompile Include="private\MainApp.cpp">
       <Filter>00. MainApp</Filter>
     </ClCompile>
-    <ClCompile Include="Defines.h">
-      <Filter>99. Defines</Filter>
-    </ClCompile>
     <ClCompile Include="pch.cpp">
       <Filter>99. Defines</Filter>
+    </ClCompile>
+    <ClCompile Include="Private\BoundingVolume.cpp">
+      <Filter>01. BoundingVoulme</Filter>
+    </ClCompile>
+    <ClCompile Include="private\Camera.cpp">
+      <Filter>02. Camera</Filter>
+    </ClCompile>
+    <ClCompile Include="Private\Terrain.cpp">
+      <Filter>03. Terrain</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -63,5 +93,10 @@
     <ResourceCompile Include="DX9.rc">
       <Filter>98. Default</Filter>
     </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="Bin\Resource\Effect\toon.fx">
+      <Filter>04. Effect</Filter>
+    </FxCompile>
   </ItemGroup>
 </Project>
